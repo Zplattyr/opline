@@ -1,4 +1,4 @@
-from sqlalchemy import insert,text
+from sqlalchemy import insert,text,delete
 
 
 def InsertUser(table, value):
@@ -11,5 +11,21 @@ def InsertUrl(engine, table, url):
                 {"url": url}
             ]
         )
+        conn.execute(stmt)
+        conn.commit()
+
+def InsertPasscode(engine, table, code, date):
+    with engine.connect() as conn:
+        stmt = insert(table).values(
+            [
+                {"passcode": code, "expiry_date": date}
+            ]
+        )
+        conn.execute(stmt)
+        conn.commit()
+
+def DeleteUrl(engine, table, url):
+    with engine.connect() as conn:
+        stmt = delete(table).where(table.c.url == url)
         conn.execute(stmt)
         conn.commit()

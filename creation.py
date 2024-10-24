@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session,sessionmaker
-from sqlalchemy import URL, create_engine, text
+from sqlalchemy import URL, create_engine, text, Date
 from config import settings
 from sqlalchemy import types
 from sqlalchemy import Table, Column, Integer, String, MetaData
@@ -13,7 +13,7 @@ passcodes = Table(
     "passcodes",
     metadata,
     Column("passcode", String, primary_key=True),
-    Column("expiry_date", types.Date)
+    Column("expiry_date", String)
 )
 
 availables = Table(
@@ -55,7 +55,8 @@ def create_tables():
 
 create_tables()
 insertData.InsertUrl(engine, availables, 'vless://31aefed4-d979-4a72-ae72-eb8b618d7be4@185.70.199.184:3389?type=tcp&security=reality&pbk=0v3q7-B_aGeMZts8lmIeBAXHwnuwjikCgwoM6071PyU&fp=random&sni=yahoo.com&sid=ac&spx=%2F&flow=xtls-rprx-vision#comp2-3')
-
+insertData.InsertUrl(engine, availables, 'vless://31aefefd4-d979-4a72-ae72-eb8b618d7be4@185.70.199.184:3389?type=tcp&security=reality&pbk=0v3q7-B_aGeMZts8lmIeBAXHwnuwjikCgwoM6071PyU&fp=random&sni=yahoo.com&sid=ac&spx=%2F&flow=xtls-rprx-vision#comp2-3')
+insertData.InsertPasscode(engine, passcodes, 'pass', '2026-11-29')
 
 with engine.connect() as conn:
     res = conn.execute(text("select * from availables"))
