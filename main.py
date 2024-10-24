@@ -96,6 +96,10 @@ async def is_online(pasco: Passcode):
         onliners[pasco.passcode] = time.time()
         print(onliners)
 
+@app.get("/test")
+def test():
+    return "helloewo"
+
 #
 # HEADER = 64
 # PORT = 5050
