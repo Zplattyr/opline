@@ -57,49 +57,55 @@ engine = create_engine(
 )
 
 app = FastAPI()
-onliners = {}
+onlinerspass = {}
+onlinersid = {}
 
 @app.post("/get_key")
 async def get_key(pasco: Passcode):
     async with mutex:
         with engine.connect() as condata:
             res = condata.execute(text("select * from passcodes")).all()
+
             passcodes = [passcode for passcode, date in res]
             dates = [date for passcode, date in res]
+
             pasco = pasco.passcode
+            res2 = condata.execute(text("select * from users where passcode = \'" + pasco + '\'')).all()
             print(pasco)
+            print(res2)
             if pasco in  passcodes:
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
-                if (passdate >= today):
+                if passdate >= today:
                     res = condata.execute(text("select * from availables")).all()
                     keys = [key for _, key in res]
                     for key in keys:
-                        if key not in onliners:
-                            return key
+                        if key not in onlinerspass:
+                            return str(key) + ' ' + res2[0][0]
                         else:
-                            if time.time() - onliners[key] >= 30:
-                                return key
+                            if time.time() - onlinerspass[key] >= 30:
+                                return str(key) + ' ' + res2[0][0]
                             else:
                                 continue
                 else:
-                    return "!INVALID"
+                    return "!INVALID "
             else:
-                return "!INVALID"
+                return "!INVALID "
 
 
 
 
-@app.post("/online")
+@app.post("/onlinepass")
 async def is_online(pasco: Passcode):
     async with mutex:
-        onliners[pasco.passcode] = time.time()
-        print(onliners)
+        onlinerspass[pasco.passcode] = time.time()
+        print(onlinerspass)
 
-@app.get("/test")
-def test():
-    return "helloewo"
-
+@app.post("/onlineid")
+async def is_online(pasco: Passcode):
+    async with mutex:
+        onlinersid[pasco.passcode] = time.time()
+        print(onlinersid)
 #
 # HEADER = 64
 # PORT = 5050
