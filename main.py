@@ -11,6 +11,7 @@ from datetime import datetime
 from pydantic import BaseModel
 import asyncio
 from getOnliners import getCountOnliners
+from resetUrls import getAndResetUrls
 
 
 mutex = asyncio.Lock()
@@ -34,9 +35,11 @@ app = FastAPI()
 onlinerspass = {}
 onlinersid = {}
 
+stop_event = asyncio.Event()
+
 @app.post("/get_key")
 async def get_key(pasco: Passcode):
-    async with mutex:
+
         with engine.connect() as condata:
             res = condata.execute(text("select * from passcodes")).all()
             query = pasco
@@ -55,7 +58,8 @@ async def get_key(pasco: Passcode):
                     if onlinersid[pasco] + 5 >= time.time():
                         return "!WAIT "
                 if passdate >= today:
-                    res = condata.execute(text("select * from availables")).all()
+                    async with mutex:
+                        res = condata.execute(text("select * from availables")).all()
                     keys:list[str] = [key for _, key in res]
                     for key in keys:
                         if (query.country and key.find(query.country) == -1):
@@ -83,7 +87,6 @@ async def get_key(pasco: Passcode):
             else:
                 return "!INVALID "
 
-
 @app.post("/onlinepass")
 async def is_online(pasco: Passcode):
     async with mutex:
@@ -105,3 +108,4 @@ async def print_clients():
 @app.on_event("startup")
 async def on_startup():
     asyncio.create_task(print_clients())
+    asyncio.create_task(getAndResetUrls(engine, mutex))

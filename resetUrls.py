@@ -1,3 +1,4 @@
+import asyncio
 import random
 import time
 from sqlalchemy import URL, create_engine, text
@@ -8,29 +9,32 @@ from config import settings
 import base64
 import random
 import string
-
-engine = create_engine(
-    url = settings.DATABASE_URL_psycopg,
-    echo=False,
-    pool_size=5,
-    max_overflow=10
-)
-
-def getAndResetUrls(engine):
-    with engine.connect() as condata:
-        res = condata.execute(text("select * from availables")).all()
-    urls = [url for _, url in res]
-    for url in urls:
-        resetUrl(url, engine)
+import os
 
 
-def resetUrl(url:str, engine):
-    host = url.split('@')[1].split(':')[0]
-    fullname = url.split('#')[1].split('-')
-    name = fullname[-5] + '-' + fullname[-4] + '-' + fullname[-3] + '-' + fullname[-2] + '-' + fullname[-1]
-    server = fullname[0] + '-' + fullname[1] + '-' + fullname[2]
+async def getAndResetUrls(engine, mutex):
+    while True:
+        async with mutex:
+            with engine.connect() as condata:
+                res = condata.execute(text("select * from availables")).all()
+        urls = [url for _, url in res]
+        for url in urls:
+            await resetUrl(url, engine, mutex)
+            print("deleted url:", url)
+        await asyncio.sleep(30)
 
-    host, main_port, panel, username, password = getHostData(host, engine)
+
+async def resetUrl(url:str, engine, mutex):
+    try:
+        host = url.split('@')[1].split(':')[0]
+        fullname = url.split('#')[1].split('-')
+        name = fullname[-5] + '-' + fullname[-4] + '-' + fullname[-3] + '-' + fullname[-2] + '-' + fullname[-1]
+        server = fullname[0] + '-' + fullname[1] + '-' + fullname[2]
+    except:
+        return
+
+    async with mutex:
+        host, main_port, panel, username, password = getHostData(host, engine)
 
     # print(host, main_port, panel, username, password)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
@@ -42,20 +46,40 @@ def resetUrl(url:str, engine):
         remark = indata['remark']
         if remark != server:
             continue
-        print(indata)
+        # print(indata)
         clients = json.loads(indata['settings'])['clients']
         for client in clients:
-            print(client['email'], name, onliners, server)
+            # print(client['email'], name, onliners, server)
             if client['email'] == name and name not in onliners:
                 id = indata['id']
                 if server.find('trojan') != -1:
-                    print(url)
+                    # print(url)
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, server)
-                    AddToAvailables(engine, key)
+                    async with mutex:
+                        AddToAvailables(engine, key)
+                        DeleteFromAvailables(engine, url)
                     deleteTrojan(host, main_port, panel, username, password, id, client['password'])
-                    DeleteFromAvailables(engine, url)
+                elif server.find('vless') != -1:
+                    # print(url)
+                    pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
+                    sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
+                    key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
+                    async with mutex:
+                        AddToAvailables(engine, key)
+                        DeleteFromAvailables(engine, url)
+                    deleteVless(host, main_port, panel, username, password, id, client['id'])
+                elif server.find('shadowsocks') != -1:
+                    # print(indata)
+                    security = json.loads(indata['settings'])['method']
+                    host_pwd = json.loads(indata['settings'])['password']
+                    key = addSS(host, main_port, indata['port'], panel, username, password, id, security, host_pwd, server)
+                    # print(key)
+                    async with mutex:
+                        AddToAvailables(engine, key)
+                        DeleteFromAvailables(engine, url)
+                    deleteSS(host, main_port, panel, username, password, id, client['email'])
 
 
 def DeleteFromAvailables(engine, url):
@@ -65,7 +89,7 @@ def DeleteFromAvailables(engine, url):
                 condata.execute(text('delete from availables where "url" = \'' + url + '\''))
             break
         except:
-            print('cantaddtoavailables')
+            print('cantdeletefromavailables')
 
 def AddToAvailables(engine, url):
     while True:
@@ -75,7 +99,6 @@ def AddToAvailables(engine, url):
             break
         except:
             print('cantaddtoavailables')
-
 
 def deleteTrojan(host,main_port,panel,username,password,id,pwd):
         session = requests.session()
@@ -91,10 +114,123 @@ def deleteTrojan(host,main_port,panel,username,password,id,pwd):
             'Accept': 'application/json'
         }
         response = session.request("POST", url, headers=headers, data=payload)
-        print(response.text)
+        # print(response.text)
 
 
 
+def addVless(host, main_port, port, panel, username, password, id, pbk, sid, server):
+    session = requests.session()
+    url = f"http://{host}:{main_port}/{panel}/login"
+    data = {
+        'username': username,
+        'password': password
+    }
+    response = session.post(url, data=data)
+    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/addClient/"
+    headers = {
+        'Accept': 'application/json'
+    }
+    client_data = {
+        "id": id,
+        "settings": json.dumps({
+            "clients": [{
+                "id": str(uuid.uuid1()),
+                "alterId": 90,
+                "flow": "xtls-rprx-vision",
+                "email": str(uuid.uuid1()),
+                "limitIp": 1,
+                "totalGB": 0,
+                "expiryTime": 0,
+                "enable": True,
+                "tgId": "",
+                "subId": str(uuid.uuid1())
+            }]
+        })
+    }
+    key = f"vless://{json.loads(client_data['settings'])['clients'][0]['id']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=random&sni=yahoo.com&sid={sid}&spx=%2F&flow=xtls-rprx-vision#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
+    response = session.request("POST", url, headers=headers, data=client_data)
+    # print(response.text)
+    return key
+
+def deleteVless(host,main_port,panel,username,password,id,client_id):
+    session = requests.session()
+    url = f"http://{host}:{main_port}/{panel}/login"
+    data = {
+        'username': username,
+        'password': password
+    }
+    response = session.post(url, data=data)
+    old_client_id = client_id
+    # print(old_client_id, id)
+    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/" + str(id) + "/delClient/" + str(old_client_id)
+    payload = {}
+    headers = {
+        'Accept': 'application/json'
+    }
+    response = session.request("POST", url, headers=headers, data=payload)
+
+    # print(response.text)
+
+def deleteSS(host,main_port,panel,username,password,id,pwd):
+    session = requests.session()
+    url = f"http://{host}:{main_port}/{panel}/login"
+    data = {
+        'username': username,
+        'password': password
+    }
+    response = session.post(url, data=data)
+    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/" + str(id) + "/delClient/" + str(pwd)
+    payload = {}
+    headers = {
+        'Accept': 'application/json'
+    }
+    response = session.request("POST", url, headers=headers, data=payload)
+
+    # print(response.text)
+
+def addSS(host, main_port, port, panel, username, password, id, security, host_pwd, server):
+    session = requests.session()
+    url = f"http://{host}:{main_port}/{panel}/login"
+    data = {
+        'username': username,
+        'password': password
+    }
+    response = session.post(url, data=data)
+    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/addClient/"
+    headers = {
+        'Accept': 'application/json'
+    }
+    client_data = {
+        "id": id,
+        "settings": json.dumps({
+            "clients": [{
+      "method": "",
+      "password": generate_random_base64_password(),
+      "email": str(uuid.uuid1()),
+      "limitIp": 1,
+      "totalGB": 0,
+      "expiryTime": 0,
+      "enable": True,
+      "tgId": "",
+      "subId": str(uuid.uuid1()),
+      "reset": 0
+    }]
+        })
+    }
+    a = f"{security}:{host_pwd}:{json.loads(client_data['settings'])['clients'][0]['password']}"
+    a = base64.b64encode(a.encode()).decode()
+    a = a.split('=')[0]
+    key = f"ss://{a}@{host}:{port}?type=tcp#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
+    response = session.request("POST", url, headers=headers, data=client_data)
+    # print(response)
+    return key
+
+def generate_random_base64_password(length=32):
+    # Генерируем случайные байты заданной длины
+    random_bytes = os.urandom(length)
+    # Кодируем в Base64
+    base64_password = base64.b64encode(random_bytes).decode()
+    return base64_password
 
 def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, server):
     session = requests.session()
@@ -126,6 +262,7 @@ def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, se
     }
     key = f"trojan://{json.loads(client_data['settings'])['clients'][0]['password']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=random&sni=yahoo.com&sid={sid}&spx=%2F#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
     response = session.request("POST", url, headers=headers, data=client_data)
+    # print(response)
     return key
 
 
@@ -137,10 +274,15 @@ def generate_base62_password(length=10):
     return password
 
 def getHostData(host, engine):
-    with engine.connect() as conn:
-        stmt = text('select * from hosts where "host" = \'' + host + '\'')
-        res = conn.execute(stmt)
-        host_info = res.fetchall()[0]
+    while True:
+        try:
+            with engine.connect() as conn:
+                stmt = text('select * from hosts where "host" = \'' + host + '\'')
+                res = conn.execute(stmt)
+                host_info = res.fetchall()[0]
+            break
+        except:
+            print('cantgethostdata')
 
     host = host_info[1]
     main_port = host_info[2]
@@ -185,5 +327,16 @@ def getOnliners(host, main_port, panel, username, password):
 # decoded_str = decoded_bytes.decode('utf-8')  # Если строка в UTF-8
 # # 2022-blake3-aes-256-gcm:5R2seCBlQZG2UkQ0eVKqmN64UqUuYAdXy4l3sVvDAEY=:jcNxqARh+jcvqZm014vcXOJ73up6XwbcnN+6/rePAes=
 # print(decoded_str)
-getAndResetUrls(engine)
+# getAndResetUrls(engine)
 
+
+# security = '2022-blake3-aes-256-gcm'
+# host_pwd = "gJLgl5l1Ze4M7DTY7EpmlSG1aT8f1IZVUC76HDOm0BU="
+# client_pwd = "NYW4btPNcbAJ4aKnsch9/AMSWxscnRGNvgYQReq9vNw="
+#
+# a = f"{security}:{host_pwd}:{client_pwd}"
+# a = str(base64.b64encode(a.encode()))
+# a = a.split('=')[0]
+# print(a)
+# 'MjAyMi1ibGFrZTMtYWVzLTI1Ni1nY206Z0pMZ2w1bDFaZTRNN0RUWTdFcG1sU0cxYVQ4ZjFJWlZVQzc2SERPbTBCVT06TllXNGJ0UE5jYkFKNGFLbnNjaDkvQU1TV3hzY25SR052Z1lRUmVxOXZOdz0'
+# 'MjAyMi1ibGFrZTMtYWVzLTI1Ni1nY206Z0pMZ2w1bDFaZTRNN0RUWTdFcG1sU0cxYVQ4ZjFJWlZVQzc2SERPbTBCVT06TllXNGJ0UE5jYkFKNGFLbnNjaDkvQU1TV3hzY25SR052Z1lRUmVxOXZOdz0@'
