@@ -58,6 +58,8 @@ async def get_key(pasco: Passcode):
                     if onlinersid[pasco] + 5 >= time.time():
                         return "!WAIT "
                 if passdate >= today:
+                    if stop_event.is_set():
+                        await stop_event.wait()
                     async with mutex:
                         res = condata.execute(text("select * from availables")).all()
                     keys:list[str] = [key for _, key in res]
@@ -108,4 +110,4 @@ async def print_clients():
 @app.on_event("startup")
 async def on_startup():
     asyncio.create_task(print_clients())
-    asyncio.create_task(getAndResetUrls(engine, mutex))
+    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))

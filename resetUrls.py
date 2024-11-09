@@ -12,19 +12,19 @@ import string
 import os
 
 
-async def getAndResetUrls(engine, mutex):
+async def getAndResetUrls(engine, mutex, stop_event):
     while True:
         async with mutex:
             with engine.connect() as condata:
                 res = condata.execute(text("select * from availables")).all()
         urls = [url for _, url in res]
         for url in urls:
-            await resetUrl(url, engine, mutex)
+            await resetUrl(url, engine, mutex, stop_event)
             print("deleted url:", url)
         await asyncio.sleep(30)
 
 
-async def resetUrl(url:str, engine, mutex):
+async def resetUrl(url:str, engine, mutex, stop_event):
     try:
         host = url.split('@')[1].split(':')[0]
         fullname = url.split('#')[1].split('-')
@@ -57,18 +57,22 @@ async def resetUrl(url:str, engine, mutex):
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, server)
+                    stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
                         DeleteFromAvailables(engine, url)
+                    stop_event.clear()
                     deleteTrojan(host, main_port, panel, username, password, id, client['password'])
                 elif server.find('vless') != -1:
                     # print(url)
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
+                    stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
                         DeleteFromAvailables(engine, url)
+                    stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
                 elif server.find('shadowsocks') != -1:
                     # print(indata)
@@ -76,9 +80,11 @@ async def resetUrl(url:str, engine, mutex):
                     host_pwd = json.loads(indata['settings'])['password']
                     key = addSS(host, main_port, indata['port'], panel, username, password, id, security, host_pwd, server)
                     # print(key)
+                    stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
                         DeleteFromAvailables(engine, url)
+                    stop_event.clear()
                     deleteSS(host, main_port, panel, username, password, id, client['email'])
 
 
