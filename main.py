@@ -50,7 +50,7 @@ async def get_key(pasco: Passcode):
         res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
         print("Passcode: ", pasco)
         print("SQL: ", res2)
-        if pasco in  passcodes:
+        if pasco in passcodes:
             passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
             today = datetime.today()
             if pasco in onlinerspass:
@@ -75,13 +75,12 @@ async def get_key(pasco: Passcode):
                     print("Count: ", count_onliners)
                     if(count_onliners > MAX_ON_SERVER):
                         continue
-                    try:
-                        if not isUrlOnline(key):
-                            return str(key) + ' ' + res2[0][0]
-                        else:
-                            continue
-                    except:
-                        return "!INVLAID "
+
+                    if not isUrlOnline(key):
+                        return str(key) + ' ' + res2[0][0]
+                    else:
+                        continue
+
             else:
                 return "!INVALID "
         else:
