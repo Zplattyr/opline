@@ -4,6 +4,7 @@ from sqlalchemy import text
 import requests
 import json
 import uuid
+from resetUrls import getOnliners
 
 def getCountOnliners(url, engine):
     host = url.split('@')[1].split(':')[0]
@@ -49,3 +50,17 @@ def count_online(host, main_port, panel, username, password):
     else:
         count = 0
     return count
+
+async def isUrlOnline(engine, url, mutex):
+    try:
+        host = url.split('@')[1].split(':')[0]
+        fullname = url.split('#')[1].split('-')
+        name = fullname[-5] + '-' + fullname[-4] + '-' + fullname[-3] + '-' + fullname[-2] + '-' + fullname[-1]
+        server = fullname[0] + '-' + fullname[1] + '-' + fullname[2]
+    except:
+        return
+    async with mutex:
+        host, main_port, panel, username, password = getHostData(host, engine)
+    onliners, inbounds = getOnliners(host, main_port, panel, username, password)
+    if not onliners: onliners = []
+    return name in onliners
