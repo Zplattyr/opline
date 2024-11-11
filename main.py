@@ -75,16 +75,20 @@ async def get_key(pasco: Passcode):
                     print("Count: ", count_onliners)
                     if(count_onliners > MAX_ON_SERVER):
                         continue
-
-                    if not isUrlOnline(key):
-                        return str(key) + ' ' + res2[0][0]
-                    else:
-                        continue
-
+                    try:
+                        if not isUrlOnline(key):
+                            return str(key) + ' ' + res2[0][0]
+                        else:
+                            continue
+                    except:
+                        print('nouser')
+                        return "!INVLAID "
             else:
+                print('dateexpired')
                 return "!INVALID "
         else:
-                return "!INVALID "
+            print('notinpasscodes')
+            return "!INVALID "
 
 
 @app.post("/onlinepass")
