@@ -51,13 +51,13 @@ async def get_key(pasco: Passcode):
         print("Passcode: ", pasco)
         print("SQL: ", res2)
         if pasco in  passcodes:
-            async with mutex:
-                onlinerspass[query.passcode] = time.time()
             passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
             today = datetime.today()
             if pasco in onlinerspass:
                 if onlinerspass[pasco] + 5 >= time.time():
                     return "!WAIT "
+            async with mutex:
+                onlinerspass[query.passcode] = time.time()
             if passdate >= today:
                 if stop_event.is_set():
                     await stop_event.wait()
