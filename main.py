@@ -39,8 +39,6 @@ stop_event = asyncio.Event()
 
 @app.post("/get_key")
 async def get_key(pasco: Passcode):
-    async with mutex:
-        onlinerspass[pasco.passcode] = time.time()
     with engine.connect() as condata:
         res = condata.execute(text("select * from passcodes")).all()
         query = pasco
@@ -53,6 +51,8 @@ async def get_key(pasco: Passcode):
         print("Passcode: ", pasco)
         print("SQL: ", res2)
         if pasco in  passcodes:
+            async with mutex:
+                onlinerspass[query.passcode] = time.time()
             passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
             today = datetime.today()
             if pasco in onlinerspass:
