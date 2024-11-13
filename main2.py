@@ -32,5 +32,3 @@ if __name__ == "__main__":
     start_server(ADDR)
 
 
-a='trojan://yGWeXaIkVe@185.70.196.100:33218?type=tcp&security=reality&pbk=69pnj67jNdT_r4DOusldu0YAbGp69rMJK4dM_4NWEgc&fp=random&sni=yahoo.com&sid=08aaa9fc6b3c&spx=%2F#poland-1-trojan-969d9816-9e5d-11ef-bf21-00155d968f58'
-b='trojan://yGWeXaIkVe@185.70.196.100:33218?type=tcp&security=reality&pbk=69pnj67jNdT_r4DOusldu0YAbGp69rMJK4dM_4NWEgc&fp=random&sni=yahoo.com&sid=08aaa9fc6b3c&spx=%2F#poland-1-trojan-969d9816-9e5d-11ef-bf21-00155d968f58'
