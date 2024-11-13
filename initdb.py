@@ -2,7 +2,7 @@ import os
 from sqlalchemy.engine import URL
 from sqlalchemy import types, create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData
-from .config import settings
+from config import settings
 
 postgress_url = settings.DATABASE_URL_psycopg
 
