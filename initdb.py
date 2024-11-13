@@ -12,7 +12,7 @@ passcodes = Table(
     "passcodes",
     metadata,
     Column("passcode", String, primary_key=True),
-    Column("expiry_date", types.Date)
+    Column("expiry_date", String)
 )
 
 availables = Table(
