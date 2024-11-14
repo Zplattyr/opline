@@ -19,7 +19,10 @@ async def getAndResetUrls(engine, mutex, stop_event):
                 res = condata.execute(text("select * from availables")).all()
         urls = [url for _, url in res]
         for url in urls:
-            await resetUrl(url, engine, mutex, stop_event)
+            try:
+                await resetUrl(url, engine, mutex, stop_event)
+            except:
+                continue
             print("deleted url:", url[0:30])
         await asyncio.sleep(540)
         print('1 minute before reset urls')

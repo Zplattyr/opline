@@ -87,7 +87,7 @@ def GetPromocode(engine, promocode):
             with engine.connect() as conn:
                 stmt = text('select * from promocodes where "promocode" = \'' + promocode + '\'')
                 res = conn.execute(stmt)
-                return res.fetchall()[0]
+                return res.fetchall()
         except:
             print('cant getpromocde')
 
@@ -106,7 +106,7 @@ def GetUsersPromocodes(engine, id):
             with engine.connect() as conn:
                 stmt = text('select * from users_promocodes where id = \'' + id + '\'')
                 res = conn.execute(stmt)
-                return res.fetchall()[0]
+                return res.fetchall()
         except:
             print('cant getuserspromocodes')
 
