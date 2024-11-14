@@ -1,4 +1,3 @@
-import asyncio
 import os
 from sqlalchemy.engine import URL
 from sqlalchemy import types, create_engine, text
@@ -72,28 +71,27 @@ engine = create_engine(
     max_overflow=10
 )
 
-async def UpdatePromocode(engine, count, promocode):
+def UpdatePromocode(engine, count, promocode):
     while True:
         try:
-            async with engine.connect() as conn:
+            with engine.begin() as conn:
                 stmt = text('update promocodes set "count" = ' + str(count) + ' where "promocode" = \'' + promocode +'\'')
-                await conn.execute(stmt)
-                await conn.commit()
+                conn.execute(stmt)
             break
         except:
             print('cant updatehost')
 
-async def GetPromocode(engine, promocode):
-            async with engine.connect() as conn:
+def GetPromocode(engine, promocode):
+    while True:
+        try:
+            with engine.connect() as conn:
                 stmt = text('select * from promocodes where "promocode" = \'' + promocode + '\'')
-                res = await conn.execute(stmt)
+                res = conn.execute(stmt)
                 return res.fetchall()[0]
+        except:
+            print('cant getpromocde')
 
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-async def main():
-    a = await GetPromocode(engine, 'abc')
-    await UpdatePromocode(engine, a[1] + 1, 'abc')
-
-asyncio.run(main())
+UpdatePromocode(engine, GetPromocode(engine, 'abc')[1] + 1, 'abc')
