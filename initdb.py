@@ -79,7 +79,7 @@ def UpdatePromocode(engine, count, promocode):
                 conn.execute(stmt)
             break
         except:
-            print('cant updatehost')
+            print('cant updatepromocode')
 
 def GetPromocode(engine, promocode):
     while True:
@@ -98,11 +98,21 @@ def AddToUsersPromocodes(engine, id, promocode):
                 condata.execute(text('insert into users_promocodes (id, promocode) values (\'' + id + '\', \'' + promocode + '\')'))
             break
         except:
-            print('cantaddtoavailables')
+            print('cantaddtouserspromocodes')
+
+def GetUsersPromocodes(engine, id):
+    while True:
+        try:
+            with engine.connect() as conn:
+                stmt = text('select * from users_promocodes where id = \'' + id + '\'')
+                res = conn.execute(stmt)
+                return res.fetchall()[0]
+        except:
+            print('cant getuserspromocodes')
 
 
 
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-AddToUsersPromocodes(engine, '1234', 'abc')
+print(GetUsersPromocodes(engine, '1234'))
