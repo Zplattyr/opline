@@ -82,12 +82,12 @@ async def UpdatePromocode(engine, count, promocode):
         except:
             print('cant updatehost')
 
-def GetPromocode(engine, promocode):
+async def GetPromocode(engine, promocode):
     while True:
         try:
-            with engine.connect() as conn:
+            async with engine.connect() as conn:
                 stmt = text('select * from promocodes where "promocode" = \'' + promocode + '\'')
-                res = conn.execute(stmt)
+                res = await conn.execute(stmt)
                 return res.fetchall()[0]
         except:
             print('cant getpromocde')
