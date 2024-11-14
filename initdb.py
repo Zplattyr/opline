@@ -1,3 +1,4 @@
+import asyncio
 import os
 from sqlalchemy.engine import URL
 from sqlalchemy import types, create_engine, text
@@ -95,8 +96,8 @@ async def GetPromocode(engine, promocode):
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-async def main():
+def main():
     a = await GetPromocode(engine, 'abc')
     await UpdatePromocode(engine, a[1] + 1, 'abc')
 
-main()
+asyncio.run(main())
