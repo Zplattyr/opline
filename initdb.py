@@ -115,4 +115,6 @@ def GetUsersPromocodes(engine, id):
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-print(GetUsersPromocodes(engine, '1234'))
+print(GetUsersPromocodes(engine, '12345'))
+
+
