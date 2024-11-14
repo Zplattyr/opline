@@ -91,7 +91,18 @@ def GetPromocode(engine, promocode):
         except:
             print('cant getpromocde')
 
+def AddToUsersPromocodes(engine, id, promocode):
+    while True:
+        try:
+            with engine.begin() as condata:
+                condata.execute(text('insert into users_promocodes (id, promocode) values (\'' + id + '\', \'' + promocode + '\')'))
+            break
+        except:
+            print('cantaddtoavailables')
+
+
+
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-UpdatePromocode(engine, GetPromocode(engine, 'abc')[1] + 1, 'abc')
+AddToUsersPromocodes(engine, '1234', 'abc')
