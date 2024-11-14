@@ -1,6 +1,6 @@
 import os
 from sqlalchemy.engine import URL
-from sqlalchemy import types, create_engine
+from sqlalchemy import types, create_engine, text
 from sqlalchemy import Table, Column, Integer, String, MetaData
 from config import settings
 
@@ -71,5 +71,28 @@ engine = create_engine(
     max_overflow=10
 )
 
+async def UpdatePromocode(engine, count, promocode):
+    while True:
+        try:
+            async with engine.connect() as conn:
+                stmt = text('update promocodes set "count" = ' + str(count) + ' where "promocode" = \'' + promocode +'\'')
+                await conn.execute(stmt)
+                await conn.commit()
+            break
+        except:
+            print('cant updatehost')
+
+def GetPromocode(engine, promocode):
+    while True:
+        try:
+            with engine.connect() as conn:
+                stmt = text('select * from promocodes where "promocode" = \'' + promocode + '\'')
+                res = conn.execute(stmt)
+                return res.fetchall()[0]
+        except:
+            print('cant getpromocde')
+
 with engine.connect() as conn:
     metadata.create_all(engine)
+
+print(GetPromocode(engine, 'abc'))
