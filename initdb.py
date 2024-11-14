@@ -95,4 +95,4 @@ def GetPromocode(engine, promocode):
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-print(GetPromocode(engine, 'abc'))
+UpdatePromocode(engine, GetPromocode(engine, 'abc')[1] + 1, 'abc')
