@@ -95,8 +95,8 @@ async def GetPromocode(engine, promocode):
 with engine.connect() as conn:
     metadata.create_all(engine)
 
-def main():
-    a = GetPromocode(engine, 'abc')
-    UpdatePromocode(engine, a[1] + 1, 'abc')
+async def main():
+    a = await GetPromocode(engine, 'abc')
+    await UpdatePromocode(engine, a[1] + 1, 'abc')
 
 main()
