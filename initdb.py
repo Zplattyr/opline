@@ -36,6 +36,21 @@ users_passcodes = Table(
     Column("passcode", String, primary_key=True),
 )
 
+promocodes = Table(
+    "promocodes",
+    metadata,
+    Column("promocode", String, primary_key=True),
+    Column("count", Integer),
+    Column("limit", Integer)
+)
+
+users_promocodes = Table(
+    "users_promocodes",
+    metadata,
+    Column("id", String),
+    Column("promocode", String),
+)
+
 hosts = Table(
     "hosts",
     metadata,
