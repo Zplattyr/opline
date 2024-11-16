@@ -285,15 +285,11 @@ def generate_base62_password(length=10):
     return password
 
 def getHostData(host, engine):
-    while True:
-        try:
-            with engine.connect() as conn:
-                stmt = text('select * from hosts where "host" = \'' + host + '\'')
-                res = conn.execute(stmt)
-                host_info = res.fetchall()[0]
-            break
-        except:
-            print('cantgethostdata')
+    with engine.connect() as conn:
+        stmt = text('select * from hosts where "host" = \'' + host + '\'')
+        res = conn.execute(stmt)
+        host_info = res.fetchall()[0]
+
 
     host = host_info[1]
     main_port = host_info[2]
