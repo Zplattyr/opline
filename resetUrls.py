@@ -146,16 +146,16 @@ def addVless(host, main_port, port, panel, username, password, id, pbk, sid, ser
         "id": id,
         "settings": json.dumps({
             "clients": [{
-                "id": str(uuid.uuid1(node=random_node)),
+                "id": str(uuid.uuid4()),
                 "alterId": 90,
                 "flow": "xtls-rprx-vision",
-                "email": str(uuid.uuid1(node=random_node)),
+                "email": str(uuid.uuid4()),
                 "limitIp": 1,
                 "totalGB": 0,
                 "expiryTime": 0,
                 "enable": True,
                 "tgId": "",
-                "subId": str(uuid.uuid1(node=random_node))
+                "subId": str(uuid.uuid4())
             }]
         })
     }
@@ -262,13 +262,13 @@ def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, se
         "settings": json.dumps({
             "clients": [{
       "password": generate_base62_password(),
-      "email": str(uuid.uuid1(node=random_node)),
+      "email": str(uuid.uuid4()),
       "limitIp": 1,
       "totalGB": 0,
       "expiryTime": 0,
       "enable": True,
       "tgId": "",
-      "subId": str(uuid.uuid1(node=random_node)),
+      "subId": str(uuid.uuid4()),
       "reset": 0
     }]
         })
