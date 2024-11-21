@@ -24,7 +24,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
                 print("deleted url:", url[0:30])
             except:
                 continue
-        await asyncio.sleep(540)
+        await asyncio.sleep(120)
         print('1 minute before reset urls')
         await asyncio.sleep(60)
 
@@ -79,18 +79,18 @@ async def resetUrl(url:str, engine, mutex, stop_event):
                         DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
-                elif server.find('shadowsocks') != -1:
-                    # print(indata)
-                    security = json.loads(indata['settings'])['method']
-                    host_pwd = json.loads(indata['settings'])['password']
-                    key = addSS(host, main_port, indata['port'], panel, username, password, id, security, host_pwd, server)
-                    # print(key)
-                    stop_event.set()
-                    async with mutex:
-                        AddToAvailables(engine, key)
-                        DeleteFromAvailables(engine, url)
-                    stop_event.clear()
-                    deleteSS(host, main_port, panel, username, password, id, client['email'])
+                # elif server.find('shadowsocks') != -1:
+                #     # print(indata)
+                #     security = json.loads(indata['settings'])['method']
+                #     host_pwd = json.loads(indata['settings'])['password']
+                #     key = addSS(host, main_port, indata['port'], panel, username, password, id, security, host_pwd, server)
+                #     # print(key)
+                #     stop_event.set()
+                #     async with mutex:
+                #         AddToAvailables(engine, key)
+                #         DeleteFromAvailables(engine, url)
+                #     stop_event.clear()
+                #     deleteSS(host, main_port, panel, username, password, id, client['email'])
 
 
 def DeleteFromAvailables(engine, url):
@@ -158,7 +158,7 @@ def addVless(host, main_port, port, panel, username, password, id, pbk, sid, ser
             }]
         })
     }
-    key = f"vless://{json.loads(client_data['settings'])['clients'][0]['id']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=random&sni=yahoo.com&sid={sid}&spx=%2F&flow=xtls-rprx-vision#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
+    key = f"vless://{json.loads(client_data['settings'])['clients'][0]['id']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=firefox&sni=localhost&sid={sid}&spx=%2F&flow=xtls-rprx-vision#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
     response = session.request("POST", url, headers=headers, data=client_data)
     # print(response.text)
     return key
@@ -181,60 +181,60 @@ def deleteVless(host,main_port,panel,username,password,id,client_id):
     response = session.request("POST", url, headers=headers, data=payload)
 
     # print(response.text)
+#
+# def deleteSS(host,main_port,panel,username,password,id,pwd):
+#     session = requests.session()
+#     url = f"http://{host}:{main_port}/{panel}/login"
+#     data = {
+#         'username': username,
+#         'password': password
+#     }
+#     response = session.post(url, data=data)
+#     url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/" + str(id) + "/delClient/" + str(pwd)
+#     payload = {}
+#     headers = {
+#         'Accept': 'application/json'
+#     }
+#     response = session.request("POST", url, headers=headers, data=payload)
+#
+#     # print(response.text)
 
-def deleteSS(host,main_port,panel,username,password,id,pwd):
-    session = requests.session()
-    url = f"http://{host}:{main_port}/{panel}/login"
-    data = {
-        'username': username,
-        'password': password
-    }
-    response = session.post(url, data=data)
-    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/" + str(id) + "/delClient/" + str(pwd)
-    payload = {}
-    headers = {
-        'Accept': 'application/json'
-    }
-    response = session.request("POST", url, headers=headers, data=payload)
-
-    # print(response.text)
-
-def addSS(host, main_port, port, panel, username, password, id, security, host_pwd, server):
-    session = requests.session()
-    url = f"http://{host}:{main_port}/{panel}/login"
-    data = {
-        'username': username,
-        'password': password
-    }
-    response = session.post(url, data=data)
-    url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/addClient/"
-    headers = {
-        'Accept': 'application/json'
-    }
-    client_data = {
-        "id": id,
-        "settings": json.dumps({
-            "clients": [{
-      "method": "",
-      "password": generate_random_base64_password(),
-      "email": str(uuid.uuid1()),
-      "limitIp": 1,
-      "totalGB": 0,
-      "expiryTime": 0,
-      "enable": True,
-      "tgId": "",
-      "subId": str(uuid.uuid1()),
-      "reset": 0
-    }]
-        })
-    }
-    a = f"{security}:{host_pwd}:{json.loads(client_data['settings'])['clients'][0]['password']}"
-    a = base64.b64encode(a.encode()).decode()
-    a = a.split('=')[0]
-    key = f"ss://{a}@{host}:{port}?type=tcp#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
-    response = session.request("POST", url, headers=headers, data=client_data)
-    # print(response)
-    return key
+# def addSS(host, main_port, port, panel, username, password, id, security, host_pwd, server):
+#     session = requests.session()
+#     url = f"http://{host}:{main_port}/{panel}/login"
+#     data = {
+#         'username': username,
+#         'password': password
+#     }
+#     response = session.post(url, data=data)
+#     url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/addClient/"
+#     headers = {
+#         'Accept': 'application/json'
+#     }
+#     client_data = {
+#         "id": id,
+#         "settings": json.dumps({
+#             "clients": [{
+#       "method": "",
+#       "password": generate_random_base64_password(),
+#       "email": str(uuid.uuid1()),
+#       "limitIp": 1,
+#       "totalGB": 0,
+#       "expiryTime": 0,
+#       "enable": True,
+#       "tgId": "",
+#       "subId": str(uuid.uuid1()),
+#       "reset": 0
+#     }]
+#         })
+#     }
+#     a = f"{security}:{host_pwd}:{json.loads(client_data['settings'])['clients'][0]['password']}"
+#     a = base64.b64encode(a.encode()).decode()
+#     a = a.split('=')[0]
+#     key = f"ss://{a}@{host}:{port}?type=tcp#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
+#     response = session.request("POST", url, headers=headers, data=client_data)
+#     # print(response)
+#     return key
 
 def generate_random_base64_password(length=32):
     # Генерируем случайные байты заданной длины
@@ -271,7 +271,7 @@ def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, se
     }]
         })
     }
-    key = f"trojan://{json.loads(client_data['settings'])['clients'][0]['password']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=random&sni=yahoo.com&sid={sid}&spx=%2F#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
+    key = f"trojan://{json.loads(client_data['settings'])['clients'][0]['password']}@{host}:{port}?type=tcp&security=reality&pbk={pbk}&fp=firefox&sni=localhost&sid={sid}&spx=%2F#{server}-{json.loads(client_data['settings'])['clients'][0]['email']}"
     response = session.request("POST", url, headers=headers, data=client_data)
     # print(response)
     return key
