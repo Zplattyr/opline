@@ -24,7 +24,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
                 print("deleted url:", url[0:30])
             except:
                 continue
-        await asyncio.sleep(120)
+        await asyncio.sleep(540)
         print('1 minute before reset urls')
         await asyncio.sleep(60)
 
@@ -344,6 +344,4 @@ def getOnliners(host, main_port, panel, username, password):
 # a = f"{security}:{host_pwd}:{client_pwd}"
 # a = str(base64.b64encode(a.encode()))
 # a = a.split('=')[0]
-# print(a)
-# 'MjAyMi1ibGFrZTMtYWVzLTI1Ni1nY206Z0pMZ2w1bDFaZTRNN0RUWTdFcG1sU0cxYVQ4ZjFJWlZVQzc2SERPbTBCVT06TllXNGJ0UE5jYkFKNGFLbnNjaDkvQU1TV3hzY25SR052Z1lRUmVxOXZOdz0'
-# 'MjAyMi1ibGFrZTMtYWVzLTI1Ni1nY206Z0pMZ2w1bDFaZTRNN0RUWTdFcG1sU0cxYVQ4ZjFJWlZVQzc2SERPbTBCVT06TllXNGJ0UE5jYkFKNGFLbnNjaDkvQU1TV3hzY25SR052Z1lRUmVxOXZOdz0@'
+# print
