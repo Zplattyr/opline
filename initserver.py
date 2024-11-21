@@ -16,6 +16,7 @@ with open("login.txt", "r", encoding="utf-8") as file:
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
     for indata in inbounds:
         remark = indata['remark']
+        id = indata['id']
         if remark.find('trojan') != -1:
             pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
             sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]

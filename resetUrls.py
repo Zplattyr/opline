@@ -130,6 +130,7 @@ def deleteTrojan(host,main_port,panel,username,password,id,pwd):
 
 
 def addVless(host, main_port, port, panel, username, password, id, pbk, sid, server):
+    random_node = random.getrandbits(48)  # Генерирует случайное 48-битное число
     session = requests.session()
     url = f"http://{host}:{main_port}/{panel}/login"
     data = {
@@ -145,16 +146,16 @@ def addVless(host, main_port, port, panel, username, password, id, pbk, sid, ser
         "id": id,
         "settings": json.dumps({
             "clients": [{
-                "id": str(uuid.uuid1()),
+                "id": str(uuid.uuid1(node=random_node)),
                 "alterId": 90,
                 "flow": "xtls-rprx-vision",
-                "email": str(uuid.uuid1()),
+                "email": str(uuid.uuid1(node=random_node)),
                 "limitIp": 1,
                 "totalGB": 0,
                 "expiryTime": 0,
                 "enable": True,
                 "tgId": "",
-                "subId": str(uuid.uuid1())
+                "subId": str(uuid.uuid1(node=random_node))
             }]
         })
     }
@@ -244,6 +245,7 @@ def generate_random_base64_password(length=32):
     return base64_password
 
 def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, server):
+    random_node = random.getrandbits(48)
     session = requests.session()
     url = f"http://{host}:{main_port}/{panel}/login"
     data = {
@@ -260,13 +262,13 @@ def addTrojan(host, main_port, port, panel, username, password, id, pbk, sid, se
         "settings": json.dumps({
             "clients": [{
       "password": generate_base62_password(),
-      "email": str(uuid.uuid1()),
+      "email": str(uuid.uuid1(node=random_node)),
       "limitIp": 1,
       "totalGB": 0,
       "expiryTime": 0,
       "enable": True,
       "tgId": "",
-      "subId": str(uuid.uuid1()),
+      "subId": str(uuid.uuid1(node=random_node)),
       "reset": 0
     }]
         })
