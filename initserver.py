@@ -1,4 +1,4 @@
-from resetUrls import getOnliners, addTrojan, addVless, AddToAvailables
+from resetUrls import getOnliners, addTrojan, addVless, AddToAvailables, generate_base62_password
 from main import engine
 import json
 import requests
@@ -46,21 +46,39 @@ def addConnection(host, main_port, conport, panel, username, password, remark, s
         'Accept': 'application/json'
     }
     private, public = genKeys()
-    connection = {
-        "up": 0,
-        "down": 0,
-        "total": 0,
-        "remark": remark,
-        "enable": True,
-        "expiryTime": 0,
-        "listen": "",
-        "port": conport,
-        "protocol": proto,
-        "settings": "{\"clients\": [{\"id\": \"b86c0cdc-8a02-4da4-8693-72ba27005587\",\"flow\": \"\",\"email\": \"first\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
-        "streamSettings": "{\"network\": \"tcp\",\"security\": \"reality\",\"externalProxy\": [],\"realitySettings\": {\"show\": false,\"xver\": 0,\"dest\": \"" + site + "\",\"serverNames\": [\"localhost\",\"www.localhost\"],\"privateKey\": \"" + private + "\",\"minClient\": \"\",\"maxClient\": \"\",\"maxTimediff\": 0,\"shortIds\": [\"47595474\",\"7a5e30\",\"810c1efd750030e8\",\"99\",\"9c19c134b8\",\"35fd\",\"2409c639a707b4\",\"c98fc6b39f45\"],\"settings\": {\"publicKey\": \"" + public + "\",\"fingerprint\": \"firefox\",\"serverName\": \"\",\"spiderX\": \"/\"}},\"tcpSettings\": {\"acceptProxyProtocol\": false,\"header\": {\"type\": \"none\"}}}",
-        "sniffing": "{\"enabled\": false,\"destOverride\": [\"http\",\"tls\",\"quic\",\"fakedns\"],\"metadataOnly\": false,\"routeOnly\": false}",
-        "allocate": "{\"strategy\": \"always\",\"refresh\": 5,\"concurrency\": 3}"
-    }
+    connection = ''
+    if proto == "vless":
+        connection = {
+            "up": 0,
+            "down": 0,
+            "total": 0,
+            "remark": remark,
+            "enable": True,
+            "expiryTime": 0,
+            "listen": "",
+            "port": conport,
+            "protocol": proto,
+            "settings": "{\"clients\": [{\"id\": \"b86c0cdc-8a02-4da4-8693-72ba27005587\",\"flow\": \"\",\"email\": \"first\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
+            "streamSettings": "{\"network\": \"tcp\",\"security\": \"reality\",\"externalProxy\": [],\"realitySettings\": {\"show\": false,\"xver\": 0,\"dest\": \"" + site + "\",\"serverNames\": [\"localhost\",\"www.localhost\"],\"privateKey\": \"" + private + "\",\"minClient\": \"\",\"maxClient\": \"\",\"maxTimediff\": 0,\"shortIds\": [\"47595474\",\"7a5e30\",\"810c1efd750030e8\",\"99\",\"9c19c134b8\",\"35fd\",\"2409c639a707b4\",\"c98fc6b39f45\"],\"settings\": {\"publicKey\": \"" + public + "\",\"fingerprint\": \"firefox\",\"serverName\": \"\",\"spiderX\": \"/\"}},\"tcpSettings\": {\"acceptProxyProtocol\": false,\"header\": {\"type\": \"none\"}}}",
+            "sniffing": "{\"enabled\": false,\"destOverride\": [\"http\",\"tls\",\"quic\",\"fakedns\"],\"metadataOnly\": false,\"routeOnly\": false}",
+            "allocate": "{\"strategy\": \"always\",\"refresh\": 5,\"concurrency\": 3}"
+        }
+    elif proto == "trojan":
+        connection = {
+            "up": 0,
+            "down": 0,
+            "total": 0,
+            "remark": remark,
+            "enable": True,
+            "expiryTime": 0,
+            "listen": "",
+            "port": conport,
+            "protocol": proto,
+            "settings": "{\"clients\": [{\"password\": \"" + generate_base62_password() + "\",\"email\": \"first\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
+            "streamSettings": "{\"network\": \"tcp\",\"security\": \"reality\",\"externalProxy\": [],\"realitySettings\": {\"show\": false,\"xver\": 0,\"dest\": \"" + site + "\",\"serverNames\": [\"localhost\",\"www.localhost\"],\"privateKey\": \"" + private + "\",\"minClient\": \"\",\"maxClient\": \"\",\"maxTimediff\": 0,\"shortIds\": [\"47595474\",\"7a5e30\",\"810c1efd750030e8\",\"99\",\"9c19c134b8\",\"35fd\",\"2409c639a707b4\",\"c98fc6b39f45\"],\"settings\": {\"publicKey\": \"" + public + "\",\"fingerprint\": \"firefox\",\"serverName\": \"\",\"spiderX\": \"/\"}},\"tcpSettings\": {\"acceptProxyProtocol\": false,\"header\": {\"type\": \"none\"}}}",
+            "sniffing": "{\"enabled\": false,\"destOverride\": [\"http\",\"tls\",\"quic\",\"fakedns\"],\"metadataOnly\": false,\"routeOnly\": false}",
+            "allocate": "{\"strategy\": \"always\",\"refresh\": 5,\"concurrency\": 3}"
+        }
     response = session.request("POST", url, headers=headers, data=connection)
     print(response.text)
 
