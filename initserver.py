@@ -74,7 +74,7 @@ def addConnection(host, main_port, conport, panel, username, password, remark, s
             "listen": "",
             "port": conport,
             "protocol": proto,
-            "settings": "{\"clients\": [{\"password\": \"" + generate_base62_password() + "\",\"email\": \"first\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
+            "settings": "{\"clients\": [{\"password\": \"" + generate_base62_password() + "\",\"email\": \"firsttrojan\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
             "streamSettings": "{\"network\": \"tcp\",\"security\": \"reality\",\"externalProxy\": [],\"realitySettings\": {\"show\": false,\"xver\": 0,\"dest\": \"" + site + "\",\"serverNames\": [\"localhost\",\"www.localhost\"],\"privateKey\": \"" + private + "\",\"minClient\": \"\",\"maxClient\": \"\",\"maxTimediff\": 0,\"shortIds\": [\"47595474\",\"7a5e30\",\"810c1efd750030e8\",\"99\",\"9c19c134b8\",\"35fd\",\"2409c639a707b4\",\"c98fc6b39f45\"],\"settings\": {\"publicKey\": \"" + public + "\",\"fingerprint\": \"firefox\",\"serverName\": \"\",\"spiderX\": \"/\"}},\"tcpSettings\": {\"acceptProxyProtocol\": false,\"header\": {\"type\": \"none\"}}}",
             "sniffing": "{\"enabled\": false,\"destOverride\": [\"http\",\"tls\",\"quic\",\"fakedns\"],\"metadataOnly\": false,\"routeOnly\": false}",
             "allocate": "{\"strategy\": \"always\",\"refresh\": 5,\"concurrency\": 3}"
