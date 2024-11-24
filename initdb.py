@@ -64,6 +64,19 @@ hosts = Table(
     Column("country", String),
 )
 
+mobile_hosts = Table(
+    "mobile_hosts",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("host", String),
+    Column("port", String),
+    Column("panel", String),
+    Column("username", String),
+    Column("password", String),
+    Column("count", Integer),
+    Column("country", String),
+)
+
 
 engine = create_engine(
     url = settings.DATABASE_URL_psycopg,
