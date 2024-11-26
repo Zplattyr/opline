@@ -22,6 +22,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
             try:
                 await resetUrl(url, engine, mutex, stop_event)
                 print("deleted url:", url[0:30])
+                await asyncio.sleep(5)
             except:
                 continue
         await asyncio.sleep(240)
