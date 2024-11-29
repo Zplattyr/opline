@@ -57,7 +57,11 @@ async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
         clients = json.loads(indata['settings'])['clients']
         for client in clients:
             # print(client['email'], name, onliners, server)
-            if client['email'] == name and name not in onliners and time.time() - onlinerskey[url] >= 10:
+            if url not in onlinerskey:
+                last_time = 0
+            else:
+                last_time = onlinerskey[url]
+            if client['email'] == name and name not in onliners and time.time() - last_time >= 10:
                 id = indata['id']
                 if server.find('trojan') != -1:
                     # print(url)
