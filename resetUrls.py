@@ -45,6 +45,7 @@ async def resetUrl(url:str, engine, mutex, stop_event):
     # print(host, main_port, panel, username, password)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
     if not onliners: onliners = []
+    else: print('Onliners on ', server, ' - ', onliners)
     # print(inbounds)
 
 
