@@ -10,6 +10,7 @@ import base64
 import random
 import string
 import os
+from .main import onlinerskey
 
 
 async def getAndResetUrls(engine, mutex, stop_event):
@@ -57,7 +58,7 @@ async def resetUrl(url:str, engine, mutex, stop_event):
         clients = json.loads(indata['settings'])['clients']
         for client in clients:
             # print(client['email'], name, onliners, server)
-            if client['email'] == name and name not in onliners:
+            if client['email'] == name and name not in onliners and time.time() - onlinerskey[url] >= 10:
                 id = indata['id']
                 if server.find('trojan') != -1:
                     # print(url)
