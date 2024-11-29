@@ -10,7 +10,7 @@ import base64
 import random
 import string
 import os
-from .main import onlinerskey
+from main import onlinerskey
 
 
 async def getAndResetUrls(engine, mutex, stop_event):
