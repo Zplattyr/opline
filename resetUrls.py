@@ -10,10 +10,9 @@ import base64
 import random
 import string
 import os
-from main import onlinerskey
 
 
-async def getAndResetUrls(engine, mutex, stop_event):
+async def getAndResetUrls(engine, mutex, stop_event, onlinerskey):
     while True:
         async with mutex:
             with engine.connect() as condata:
@@ -21,7 +20,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
         urls = [url for _, url in res]
         for url in urls:
             try:
-                await resetUrl(url, engine, mutex, stop_event)
+                await resetUrl(url, engine, mutex, stop_event, onlinerskey)
                 print("deleted url:", url[0:30])
                 await asyncio.sleep(5)
             except:
@@ -31,7 +30,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
         await asyncio.sleep(60)
 
 
-async def resetUrl(url:str, engine, mutex, stop_event):
+async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
     try:
         host = url.split('@')[1].split(':')[0]
         fullname = url.split('#')[1].split('-')
