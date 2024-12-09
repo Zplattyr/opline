@@ -27,6 +27,24 @@ users = Table(
     metadata,
     Column("id", String, primary_key=True),
     Column("isAccepted", String),
+    Column("ref", String),
+    Column("bonus", Integer)
+)
+
+refs = Table(
+    "refs",
+    metadata,
+    Column("ref", String, primary_key=True),
+    Column("id", String),
+    Column("all_invited", Integer),
+    Column("sincebuy_invited", Integer)
+)
+
+used_refs = Table(
+    "used_refs",
+    metadata,
+    Column("id", String, primary_key=True),
+    Column("ref", String)
 )
 
 users_passcodes = Table(
