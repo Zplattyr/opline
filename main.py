@@ -57,7 +57,7 @@ async def get_key(pasco: Passcode):
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
                 if pasco in onlinerspass:
-                    if onlinerspass[pasco][0] > MAX_DEVICES:
+                    if onlinerspass[pasco][0] >= MAX_DEVICES:
                         return "!WAIT "
                 if passdate >= today:
                     if stop_event.is_set():
