@@ -137,7 +137,7 @@ async def is_online(pasco: Passcode):
             print(pasco.passcode, time.time(), onlinerspass[pasco.passcode])
         if pasco.passcode not in onlinerspass: onlinerspass[pasco.passcode] = [1, time.time()]
         else:
-            if time.time() - onlinerspass[pasco.passcode][1] > 5.1:
+            if time.time() - onlinerspass[pasco.passcode][1] > 5:
                 onlinerspass[pasco.passcode][0] = 1
                 onlinerspass[pasco.passcode][1] = time.time()
             else:
@@ -151,9 +151,8 @@ async def is_online(pasco: Passcode):
 
 async def print_clients():
     while True:
-        async with mutex:
-            print(onlinerspass)
-            print(onlinerskey)
+        print(onlinerspass)
+        print(onlinerskey)
         await asyncio.sleep(30)
 
 async def delete_online_keys():
