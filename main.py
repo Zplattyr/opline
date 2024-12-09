@@ -36,7 +36,7 @@ app = FastAPI()
 onlinerspass = {}
 onlinerskey:dict = {}
 MAX_ON_SERVER = 10
-MAX_DEVICES = 1
+MAX_DEVICES = 2
 stop_event = asyncio.Event()
 
 @app.post("/get_key")
