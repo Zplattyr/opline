@@ -57,7 +57,7 @@ async def get_key(pasco: Passcode):
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
                 if pasco in onlinerspass:
-                    if onlinerspass[pasco][0] >= MAX_DEVICES:
+                    if await check_count_online(pasco) >= MAX_DEVICES:
                         return "!WAIT "
                 if passdate >= today:
                     if stop_event.is_set():
@@ -88,11 +88,8 @@ async def get_key(pasco: Passcode):
                                     if query.passcode not in onlinerspass:
                                         onlinerspass[query.passcode] = [1, time.time()]
                                     else:
-                                        if time.time() - onlinerspass[query.passcode][1] > 5:
-                                            onlinerspass[query.passcode][0] = 1
-                                            onlinerspass[query.passcode][1] = time.time()
-                                        else:
-                                            onlinerspass[query.passcode][0] += 1
+                                        onlinerspass[query.passcode][0] += 1
+                                        onlinerspass[query.passcode][1] = time.time()
                                 return str(key) + ' ' + res2[0][0]
                             else:
                                 continue
@@ -130,18 +127,26 @@ async def get_key(pasco: Passcode):
                 return "!INVALID "
 
 
+async def check_count_online(passcode):
+    if passcode in onlinerspass:
+        async with mutex:
+            start_value = onlinerspass[passcode][0]
+        await asyncio.sleep(5)
+        async with mutex:
+            end_value = onlinerspass[passcode][0]
+        return end_value - start_value
+    else:
+        return 0
+
+
 @app.post("/onlinepass")
 async def is_online(pasco: Passcode):
     async with mutex:
-        if pasco.passcode in onlinerspass:
-            print(pasco.passcode, time.time(), onlinerspass[pasco.passcode])
-        if pasco.passcode not in onlinerspass: onlinerspass[pasco.passcode] = [1, time.time()]
+        if pasco.passcode not in onlinerspass:
+            onlinerspass[pasco.passcode] = [1, time.time()]
         else:
-            if time.time() - onlinerspass[pasco.passcode][1] > 5:
-                onlinerspass[pasco.passcode][0] = 1
-                onlinerspass[pasco.passcode][1] = time.time()
-            else:
-                onlinerspass[pasco.passcode][0] += 1
+            onlinerspass[pasco.passcode][0] += 1
+            onlinerspass[pasco.passcode][1] = time.time()
 
 @app.post("/onlinekey")
 async def is_online(pasco: Passcode):
