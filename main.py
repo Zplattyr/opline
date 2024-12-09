@@ -134,6 +134,7 @@ async def check_count_online(passcode):
         await asyncio.sleep(5)
         async with mutex:
             end_value = onlinerspass[passcode][0]
+        print(end_value - start_value)
         return end_value - start_value
     else:
         return 0
