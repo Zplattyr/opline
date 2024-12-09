@@ -133,7 +133,8 @@ async def get_key(pasco: Passcode):
 @app.post("/onlinepass")
 async def is_online(pasco: Passcode):
     async with mutex:
-        print(pasco.passcode, time.time(), onlinerspass[pasco.passcode])
+        if pasco.passcode in onlinerspass:
+            print(pasco.passcode, time.time(), onlinerspass[pasco.passcode])
         if pasco.passcode not in onlinerspass: onlinerspass[pasco.passcode] = [1, time.time()]
         else:
             if time.time() - onlinerspass[pasco.passcode][1] > 5.1:
