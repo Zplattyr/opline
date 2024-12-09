@@ -135,7 +135,7 @@ async def is_online(pasco: Passcode):
     async with mutex:
         if pasco.passcode not in onlinerspass: onlinerspass[pasco.passcode] = [1, time.time()]
         else:
-            if time.time() - onlinerspass[pasco.passcode][1] > 5:
+            if time.time() - onlinerspass[pasco.passcode][1] > 5.1:
                 onlinerspass[pasco.passcode][0] = 1
                 onlinerspass[pasco.passcode][1] = time.time()
             else:
