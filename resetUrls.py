@@ -25,9 +25,9 @@ async def getAndResetUrls(engine, mutex, stop_event, onlinerskey):
                 await asyncio.sleep(5)
             except:
                 continue
-        await asyncio.sleep(240)
+        # await asyncio.sleep(240)
         print('1 minute before reset urls')
-        await asyncio.sleep(60)
+        # await asyncio.sleep(60)
 
 
 async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):

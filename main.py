@@ -158,7 +158,6 @@ async def is_online(pasco: Passcode):
 async def print_clients():
     while True:
         async with mutex:
-            if 'apple' in onlinerspass: print(onlinerspass['apple'])
             print(onlinerspass)
             print(onlinerskey)
         await asyncio.sleep(30)
