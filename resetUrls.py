@@ -79,16 +79,12 @@ async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
-                    print('addvless', key)
                     stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
-                        print('addtoavail', key)
                         DeleteFromAvailables(engine, url)
-                        print('deletefromavail', url)
                     stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
-                    print('deletevless', url)
                 # elif server.find('shadowsocks') != -1:
                 #     # print(indata)
                 #     security = json.loads(indata['settings'])['method']
