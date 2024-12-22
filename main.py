@@ -177,4 +177,4 @@ async def delete_online_keys():
 async def on_startup():
     asyncio.create_task(print_clients())
     asyncio.create_task(delete_online_keys())
-    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event, onlinerskey))
+    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
