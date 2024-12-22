@@ -61,7 +61,7 @@ async def resetUrl(url:str, engine, mutex, stop_event):
                 last_time = 0
             else:
                 last_time = onlinerskey[url]
-            print("reset", onlinerskey)
+            print("reset", name, name not in onliners, time.time() - last_time >= 20)
             if client['email'] == name and name not in onliners and time.time() - last_time >= 20:
                 id = indata['id']
                 if server.find('trojan') != -1:
