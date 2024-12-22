@@ -152,6 +152,7 @@ async def is_online(pasco: Passcode):
 @app.post("/onlinekey")
 async def is_online(pasco: Passcode):
     async with mutex:
+        print('received', pasco.passcode)
         onlinerskey[pasco.passcode] = time.time()
 
 
