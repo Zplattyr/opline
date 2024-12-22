@@ -13,6 +13,7 @@ import asyncio
 from getOnliners import getCountOnliners
 from resetUrls import getAndResetUrls
 from getOnliners import isUrlOnline
+from data import onlinerskey, onlinerspass
 
 
 mutex = asyncio.Lock()
@@ -33,8 +34,7 @@ engine = create_engine(
 )
 
 app = FastAPI()
-onlinerspass = {}
-onlinerskey:dict = {}
+
 MAX_ON_SERVER = 10
 MAX_DEVICES = 2
 stop_event = asyncio.Event()
@@ -159,7 +159,7 @@ async def print_clients():
     while True:
         async with mutex:
             print(onlinerspass)
-            print(onlinerskey)
+            print("main", onlinerskey)
         await asyncio.sleep(30)
 
 async def delete_online_keys():

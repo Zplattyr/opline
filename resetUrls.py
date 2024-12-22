@@ -10,9 +10,10 @@ import base64
 import random
 import string
 import os
+from data import onlinerskey
 
 
-async def getAndResetUrls(engine, mutex, stop_event, onlinerskey):
+async def getAndResetUrls(engine, mutex, stop_event):
     while True:
         async with mutex:
             with engine.connect() as condata:
@@ -20,8 +21,7 @@ async def getAndResetUrls(engine, mutex, stop_event, onlinerskey):
         urls = [url for _, url in res]
         for url in urls:
             try:
-                await resetUrl(url, engine, mutex, stop_event, onlinerskey)
-                print("deleted url:", url[0:30])
+                await resetUrl(url, engine, mutex, stop_event)
                 await asyncio.sleep(5)
             except:
                 continue
@@ -30,7 +30,7 @@ async def getAndResetUrls(engine, mutex, stop_event, onlinerskey):
         await asyncio.sleep(60)
 
 
-async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
+async def resetUrl(url:str, engine, mutex, stop_event):
     try:
         host = url.split('@')[1].split(':')[0]
         fullname = url.split('#')[1].split('-')
@@ -61,7 +61,8 @@ async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
                 last_time = 0
             else:
                 last_time = onlinerskey[url]
-            if client['email'] == name and name not in onliners and time.time() - last_time >= 10:
+            print("reset", onlinerskey)
+            if client['email'] == name and name not in onliners and time.time() - last_time >= 20:
                 id = indata['id']
                 if server.find('trojan') != -1:
                     # print(url)
@@ -85,6 +86,7 @@ async def resetUrl(url:str, engine, mutex, stop_event, onlinerskey):
                         DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
+                    print("deleted url:", url[0:30])
                 # elif server.find('shadowsocks') != -1:
                 #     # print(indata)
                 #     security = json.loads(indata['settings'])['method']
