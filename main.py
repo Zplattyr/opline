@@ -1,11 +1,8 @@
-import socket
-import threading
 import time
 
-from sqlalchemy import URL, create_engine, text
+from sqlalchemy import create_engine, text
 from config import settings
-from sqlalchemy import types
-from sqlalchemy import Table, Column, Integer, String, MetaData
+from sqlalchemy import MetaData
 from fastapi import FastAPI
 from datetime import datetime
 from pydantic import BaseModel
@@ -43,16 +40,16 @@ stop_event = asyncio.Event()
 async def get_key(pasco: Passcode):
     if not pasco.login:
         with engine.connect() as condata:
-            res = condata.execute(text("select * from passcodes")).all()
+            async with mutex:
+                res = condata.execute(text("select * from passcodes")).all()
             query = pasco
             passcodes = [passcode for passcode, date in res]
             dates = [date for passcode, date in res]
             pasco = pasco.passcode
             if len(pasco) > 10:
                 return "!INVALID "
-            res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
-            print("Passcode: ", pasco)
-            print("SQL: ", res2)
+            async with mutex:
+                res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
             if pasco in passcodes:
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
@@ -76,20 +73,17 @@ async def get_key(pasco: Passcode):
                                 count_onliners = getCountOnliners(key, engine)
                             except:
                                 continue
-                        print("Count: ", count_onliners)
                         if(count_onliners > MAX_ON_SERVER):
                             continue
                         try:
                             if not await isUrlOnline(engine, key, mutex):
-                                print(key)
-                                async with mutex:
-                                    if key in onlinerskey and time.time() - onlinerskey[key] < 10:
-                                        continue
-                                    if query.passcode not in onlinerspass:
-                                        onlinerspass[query.passcode] = [1, time.time()]
-                                    else:
-                                        onlinerspass[query.passcode][0] += 1
-                                        onlinerspass[query.passcode][1] = time.time()
+                                if key in onlinerskey and time.time() - onlinerskey[key] < 10:
+                                    continue
+                                if query.passcode not in onlinerspass:
+                                    onlinerspass[query.passcode] = [1, time.time()]
+                                else:
+                                    onlinerspass[query.passcode][0] += 1
+                                    onlinerspass[query.passcode][1] = time.time()
                                 return str(key) + ' ' + res2[0][0]
                             else:
                                 continue
@@ -104,16 +98,16 @@ async def get_key(pasco: Passcode):
                 return "!INVALID "
     else:
         with engine.connect() as condata:
-            res = condata.execute(text("select * from passcodes")).all()
+            async with mutex:
+                res = condata.execute(text("select * from passcodes")).all()
             query = pasco
             passcodes = [passcode for passcode, date in res]
             dates = [date for passcode, date in res]
             pasco = pasco.passcode
             if len(pasco) > 10:
                 return "!INVALID "
-            res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
-            print("Passcode: ", pasco)
-            print("SQL: ", res2)
+            async with mutex:
+                res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
             if pasco in passcodes:
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
@@ -129,12 +123,9 @@ async def get_key(pasco: Passcode):
 
 async def check_count_online(passcode):
     if passcode in onlinerspass:
-        async with mutex:
-            start_value = onlinerspass[passcode][0]
+        start_value = onlinerspass[passcode][0]
         await asyncio.sleep(5)
-        async with mutex:
-            end_value = onlinerspass[passcode][0]
-        print(end_value - start_value)
+        end_value = onlinerspass[passcode][0]
         return end_value - start_value
     else:
         return 0
@@ -142,34 +133,30 @@ async def check_count_online(passcode):
 
 @app.post("/onlinepass")
 async def is_online(pasco: Passcode):
-    async with mutex:
-        if pasco.passcode not in onlinerspass:
-            onlinerspass[pasco.passcode] = [1, time.time()]
-        else:
-            onlinerspass[pasco.passcode][0] += 1
-            onlinerspass[pasco.passcode][1] = time.time()
+    if pasco.passcode not in onlinerspass:
+        onlinerspass[pasco.passcode] = [1, time.time()]
+    else:
+        onlinerspass[pasco.passcode][0] += 1
+        onlinerspass[pasco.passcode][1] = time.time()
 
 @app.post("/onlinekey")
 async def is_online(pasco: Passcode):
-    async with mutex:
-        print('received', pasco.passcode)
-        onlinerskey[pasco.passcode] = time.time()
+    print('received', pasco.passcode)
+    onlinerskey[pasco.passcode] = time.time()
 
 
 async def print_clients():
     while True:
-        async with mutex:
-            print(onlinerspass)
-            print("main", onlinerskey)
+        print(onlinerspass)
+        print("main", onlinerskey)
         await asyncio.sleep(30)
 
 async def delete_online_keys():
     while True:
         keys_to_pop = []
-        async with mutex:
-            for key in onlinerskey.keys():
-                if time.time() - onlinerskey[key] > 600:
-                    keys_to_pop.append(key)
+        for key in onlinerskey.keys():
+            if time.time() - onlinerskey[key] > 600:
+                keys_to_pop.append(key)
         for key in keys_to_pop:
             onlinerskey.pop(key)
         await asyncio.sleep(600)

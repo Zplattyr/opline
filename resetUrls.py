@@ -56,7 +56,6 @@ async def resetUrl(url:str, engine, mutex, stop_event):
         # print(indata)
         clients = json.loads(indata['settings'])['clients']
         for client in clients:
-            # print(client['email'], name, onliners, server)
             if url not in onlinerskey:
                 last_time = 0
             else:
