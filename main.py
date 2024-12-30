@@ -77,7 +77,7 @@ async def get_key(pasco: Passcode):
                             continue
                         try:
                             if not await isUrlOnline(engine, key, mutex):
-                                if key in onlinerskey and time.time() - onlinerskey[key] < 10:
+                                if key in onlinerskey and time.time() - onlinerskey[key] < 1800:
                                     continue
                                 if query.passcode not in onlinerspass:
                                     onlinerspass[query.passcode] = [1, time.time()]
