@@ -51,37 +51,49 @@ async def get_key(pasco: Passcode):
             async with mutex:
                 res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
             if pasco in passcodes:
+                print(pasco, "1")
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
                 if pasco in onlinerspass:
                     if await check_count_online(pasco) >= MAX_DEVICES:
                         return "!WAIT "
                 if passdate >= today:
+                    print(pasco, "2")
                     # if stop_event.is_set():
                     #     await stop_event.wait()
                     async with mutex:
                         res = condata.execute(text("select * from availables")).all()
                     keys:list[str] = [key for _, key in res]
                     for key in keys:
+                        print(pasco, "3")
                         if (query.country and key.find(query.country) == -1):
+                            print(pasco, "4")
                             continue
                         if (query.protocol and key.find(query.protocol) == -1):
+                            print(pasco, "5")
                             continue
                         count_onliners = 0
                         if(not query.login):
+                            print(pasco, "6")
                             try:
                                 count_onliners = getCountOnliners(key, engine)
                             except:
                                 continue
                         if(count_onliners > MAX_ON_SERVER):
+                            print(pasco, "7")
                             continue
                         try:
+                            print(pasco, "8")
                             if not await isUrlOnline(engine, key, mutex):
+                                print(pasco, "9")
                                 if key in onlinerskey and time.time() - onlinerskey[key] < 1800:
+                                    print(pasco, "10")
                                     continue
                                 if query.passcode not in onlinerspass:
+                                    print(pasco, "11")
                                     onlinerspass[query.passcode] = [1, time.time()]
                                 else:
+                                    print(pasco, "12")
                                     onlinerspass[query.passcode][0] += 1
                                     onlinerspass[query.passcode][1] = time.time()
                                 return str(key) + ' ' + res2[0][0]
