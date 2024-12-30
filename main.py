@@ -34,7 +34,6 @@ app = FastAPI()
 
 MAX_ON_SERVER = 10
 MAX_DEVICES = 2
-stop_event = asyncio.Event()
 
 @app.post("/get_key")
 async def get_key(pasco: Passcode):
@@ -57,8 +56,6 @@ async def get_key(pasco: Passcode):
                     if await check_count_online(pasco) >= MAX_DEVICES:
                         return "!WAIT "
                 if passdate >= today:
-                    if stop_event.is_set():
-                        await stop_event.wait()
                     async with mutex:
                         res = condata.execute(text("select * from availables")).all()
                     keys:list[str] = [key for _, key in res]
@@ -141,7 +138,7 @@ async def is_online(pasco: Passcode):
 
 @app.post("/onlinekey")
 async def is_online(pasco: Passcode):
-    print('received', pasco.passcode)
+    # print('received', pasco.passcode)
     onlinerskey[pasco.passcode] = time.time()
 
 
@@ -165,4 +162,4 @@ async def delete_online_keys():
 async def on_startup():
     asyncio.create_task(print_clients())
     asyncio.create_task(delete_online_keys())
-    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
+    asyncio.create_task(getAndResetUrls(engine, mutex))

@@ -60,4 +60,4 @@ insertData.InsertPasscode(engine, passcodes, 'pass', '2026-11-29')
 
 with engine.connect() as conn:
     res = conn.execute(text("select * from availables"))
-    print(f"{res.all()}")
+    # print(f"{res.all()}")

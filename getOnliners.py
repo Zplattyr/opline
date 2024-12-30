@@ -10,7 +10,7 @@ def getCountOnliners(url, engine):
     host = url.split('@')[1].split(':')[0]
 
     host, main_port, panel, username, password = getHostData(host, engine)
-    print(host, main_port, panel, username, password)
+    # print(host, main_port, panel, username, password)
 
     return count_online(host, main_port, panel, username, password)
 
@@ -41,10 +41,10 @@ def count_online(host, main_port, panel, username, password):
         'password': password
     }
     response = session.post(url, data=data)
-    print(response.text)
+    # print(response.text)
     url = f"http://{host}:{main_port}/{panel}/panel/api/inbounds/onlines"
     response = session.request("POST", url)
-    print(response.text)
+    # print(response.text)
     if (response.json()['obj']):
         count = len(response.json()['obj'])
     else:
@@ -62,6 +62,6 @@ async def isUrlOnline(engine, url, mutex):
     async with mutex:
         host, main_port, panel, username, password = getHostData(host, engine)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
-    print(onliners)
+    # print(onliners)
     if not onliners: onliners = []
     return name in onliners
