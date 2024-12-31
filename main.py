@@ -63,8 +63,8 @@ async def get_key(pasco: Passcode):
                         return "!WAIT "
                 if passdate >= today:
                     print(pasco, "2")
-                    # if stop_event.is_set():
-                    #     await stop_event.wait()
+                    if stop_event.is_set():
+                        await stop_event.wait()
                     async with mutex:
                         res = condata.execute(text("select * from availables")).all()
                     keys:list[str] = [key for _, key in res]
@@ -171,11 +171,11 @@ async def delete_online_keys():
     while True:
         keys_to_pop = []
         for key in onlinerskey.keys():
-            if time.time() - onlinerskey[key] > 600:
+            if time.time() - onlinerskey[key] > 3600:
                 keys_to_pop.append(key)
         for key in keys_to_pop:
             onlinerskey.pop(key)
-        await asyncio.sleep(600)
+        await asyncio.sleep(3600)
 
 @app.on_event("startup")
 async def on_startup():

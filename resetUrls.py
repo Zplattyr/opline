@@ -68,22 +68,22 @@ async def resetUrl(url:str, engine, mutex, stop_event):
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, server)
-                    # stop_event.set()
+                    stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
                         DeleteFromAvailables(engine, url)
-                    # stop_event.clear()
+                    stop_event.clear()
                     deleteTrojan(host, main_port, panel, username, password, id, client['password'])
                 elif server.find('vless') != -1:
                     # print(url)
                     pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
-                    # stop_event.set()
+                    stop_event.set()
                     async with mutex:
                         AddToAvailables(engine, key)
                         DeleteFromAvailables(engine, url)
-                    # stop_event.clear()
+                    stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
                     print("deleted url:", url[0:30])
                 # elif server.find('shadowsocks') != -1:
