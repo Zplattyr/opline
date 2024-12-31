@@ -178,10 +178,10 @@ async def delete_online_keys():
         await asyncio.sleep(3600)
 
 @app.on_event("startup")
-async def on_startup(background_tasks: BackgroundTasks):
-    background_tasks.add_task(print_clients)
-    background_tasks.add_task(delete_online_keys)
-    background_tasks.add_task(getAndResetUrls, engine, mutex, stop_event)
-    # asyncio.create_task(print_clients())
-    # asyncio.create_task(delete_online_keys())
-    # asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
+async def on_startup():
+    # background_tasks.add_task(print_clients)
+    # background_tasks.add_task(delete_online_keys)
+    # background_tasks.add_task(getAndResetUrls, engine, mutex, stop_event)
+    asyncio.create_task(print_clients())
+    asyncio.create_task(delete_online_keys())
+    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
