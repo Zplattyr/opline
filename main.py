@@ -3,7 +3,7 @@ import time
 from sqlalchemy import create_engine, text
 from config import settings
 from sqlalchemy import MetaData
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from datetime import datetime
 from pydantic import BaseModel
 import asyncio
@@ -178,7 +178,10 @@ async def delete_online_keys():
         await asyncio.sleep(3600)
 
 @app.on_event("startup")
-async def on_startup():
-    asyncio.create_task(print_clients())
-    asyncio.create_task(delete_online_keys())
-    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
+async def on_startup(background_tasks: BackgroundTasks):
+    background_tasks.add_task(print_clients)
+    background_tasks.add_task(delete_online_keys)
+    background_tasks.add_task(getAndResetUrls, engine, mutex, stop_event)
+    # asyncio.create_task(print_clients())
+    # asyncio.create_task(delete_online_keys())
+    # asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
