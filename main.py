@@ -39,8 +39,11 @@ stop_event = asyncio.Event()
 @app.post("/get_key")
 async def get_key(pasco: Passcode):
     if not pasco.login:
+        print(pasco, "-4")
         with engine.connect() as condata:
+            print(pasco, "-3")
             async with mutex:
+                print(pasco, "-2")
                 res = condata.execute(text("select * from passcodes")).all()
             query = pasco
             passcodes = [passcode for passcode, date in res]
@@ -49,6 +52,7 @@ async def get_key(pasco: Passcode):
             if len(pasco) > 10:
                 return "!INVALID "
             async with mutex:
+                print(pasco, "-1")
                 res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
             if pasco in passcodes:
                 print(pasco, "1")
