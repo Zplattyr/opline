@@ -109,13 +109,13 @@ with open("login.txt", "r", encoding="utf-8") as file:
             sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
             for i in range(count):
                 key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, remark)
-                AddToAvailables(engine, key)
+                await AddToAvailables(engine, key)
         elif remark.find('vless') != -1:
             pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
             sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
             for i in range(count):
                 key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, remark)
-                AddToAvailables(engine, key)
+                await AddToAvailables(engine, key)
 
 
 
