@@ -17,8 +17,6 @@ from data import onlinerskey, onlinerspass
 from sqlalchemy.ext.asyncio import create_async_engine
 
 
-mutex = asyncio.Lock()
-
 class Passcode(BaseModel):
     passcode: str
     protocol: str
