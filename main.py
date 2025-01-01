@@ -175,6 +175,7 @@ async def is_online(pasco: Passcode):
 
 @app.post("/onlinekey")
 async def is_online(pasco: Passcode):
+    print("gotonline ", pasco.passcode)
     # print('received', pasco.passcode)
     onlinerskey[pasco.passcode] = time.time()
 
