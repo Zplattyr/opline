@@ -6,15 +6,15 @@ import json
 import uuid
 from resetUrls import getOnliners
 
-def getCountOnliners(url, engine):
+async def getCountOnliners(url, engine):
     host = url.split('@')[1].split(':')[0]
 
-    host, main_port, panel, username, password = getHostData(host, engine)
+    host, main_port, panel, username, password = await getHostData(host, engine)
     # print(host, main_port, panel, username, password)
 
     return count_online(host, main_port, panel, username, password)
 
-def getHostData(host, engine):
+async def getHostData(host, engine):
     async with engine.connect() as conn:
         stmt = text('select * from hosts where "host" = \'' + host + '\'')
         res = await conn.execute(stmt)
@@ -59,7 +59,7 @@ async def isUrlOnline(engine, url):
         server = fullname[0] + '-' + fullname[1] + '-' + fullname[2]
     except:
         return
-    host, main_port, panel, username, password = getHostData(host, engine)
+    host, main_port, panel, username, password = await getHostData(host, engine)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
     # print(onliners)
     if not onliners: onliners = []

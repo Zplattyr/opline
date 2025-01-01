@@ -13,7 +13,7 @@ import os
 from data import onlinerskey
 
 
-async def getAndResetUrls(engine, mutex, stop_event):
+async def getAndResetUrls(engine, stop_event):
     while True:
         async with engine.connect() as condata:
             res = (await condata.execute(text("select * from availables"))).fetchall()
@@ -38,7 +38,7 @@ async def resetUrl(url:str, engine, stop_event):
     except:
         return
 
-    host, main_port, panel, username, password = getHostData(host, engine)
+    host, main_port, panel, username, password = await getHostData(host, engine)
 
     # print(host, main_port, panel, username, password)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
@@ -67,8 +67,8 @@ async def resetUrl(url:str, engine, stop_event):
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, server)
                     stop_event.set()
-                    AddToAvailables(engine, key)
-                    DeleteFromAvailables(engine, url)
+                    await AddToAvailables(engine, key)
+                    await DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteTrojan(host, main_port, panel, username, password, id, client['password'])
                 elif server.find('vless') != -1:
@@ -77,8 +77,8 @@ async def resetUrl(url:str, engine, stop_event):
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
                     stop_event.set()
-                    AddToAvailables(engine, key)
-                    DeleteFromAvailables(engine, url)
+                    await AddToAvailables(engine, key)
+                    await DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
                     print("deleted url:", url[0:30])
@@ -89,14 +89,13 @@ async def resetUrl(url:str, engine, stop_event):
                 #     key = addSS(host, main_port, indata['port'], panel, username, password, id, security, host_pwd, server)
                 #     # print(key)
                 #     stop_event.set()
-                #     async with mutex:
-                #         AddToAvailables(engine, key)
-                #         DeleteFromAvailables(engine, url)
+                #     AddToAvailables(engine, key)
+                #     DeleteFromAvailables(engine, url)
                 #     stop_event.clear()
                 #     deleteSS(host, main_port, panel, username, password, id, client['email'])
 
 
-def DeleteFromAvailables(engine, url):
+async def DeleteFromAvailables(engine, url):
     while True:
         try:
             async with engine.begin() as condata:
@@ -105,7 +104,7 @@ def DeleteFromAvailables(engine, url):
         except:
             print('cantdeletefromavailables')
 
-def AddToAvailables(engine, url):
+async def AddToAvailables(engine, url):
     while True:
         try:
             async with engine.begin() as condata:
@@ -289,7 +288,7 @@ def generate_base62_password(length=10):
     password = ''.join(random.choice(base62_chars) for _ in range(length))
     return password
 
-def getHostData(host, engine):
+async def getHostData(host, engine):
     async with engine.connect() as conn:
         stmt = text('select * from hosts where "host" = \'' + host + '\'')
         res = await conn.execute(stmt)

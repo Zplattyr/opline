@@ -77,7 +77,7 @@ async def get_key(pasco: Passcode):
                         if(not query.login):
                             print(pasco, "6")
                             try:
-                                count_onliners = getCountOnliners(key, engine)
+                                count_onliners = await getCountOnliners(key, engine)
                             except:
                                 continue
                         if(count_onliners > MAX_ON_SERVER):
