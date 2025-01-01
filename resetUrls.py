@@ -66,7 +66,7 @@ async def resetUrl(url:str, engine, stop_event):
                 print("4444")
                 last_time = onlinerskey[url]
                 print("555", last_time)
-            print("reset", url, name not in onliners, time.time() - last_time >= 1800, datetime.now(), last_time)
+            print(f"reset, {url}, {name not in onliners}, {time.time() - last_time >= 1800}, {datetime.now()}, {datetime.fromtimestamp(last_time)}")
             if client['email'] == name and name not in onliners and time.time() - last_time >= 1800:
                 id = indata['id']
                 if server.find('trojan') != -1:
