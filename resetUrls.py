@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import random
 import time
 from sqlalchemy import URL, create_engine, text
@@ -9,8 +10,10 @@ from config import settings
 import base64
 import random
 import string
+from datetime import datetime
 import os
 from data import onlinerskey
+import datetime
 
 
 async def getAndResetUrls(engine, stop_event):
@@ -59,7 +62,7 @@ async def resetUrl(url:str, engine, stop_event):
                 last_time = 0
             else:
                 last_time = onlinerskey[url]
-            # print("reset", name, name not in onliners, time.time() - last_time >= 1800)
+            print("reset", url, name not in onliners, time.time() - last_time >= 1800, datetime.now(), datetime.fromtimestamp(last_time))
             if client['email'] == name and name not in onliners and time.time() - last_time >= 1800:
                 id = indata['id']
                 if server.find('trojan') != -1:
