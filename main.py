@@ -1,3 +1,4 @@
+import random
 import time
 
 from sqlalchemy import create_engine, text
@@ -11,6 +12,7 @@ import asyncio
 from getOnliners import getCountOnliners
 from resetUrls import getAndResetUrls
 from getOnliners import isUrlOnline
+import random
 from data import onlinerskey, onlinerspass
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -37,16 +39,24 @@ app = FastAPI()
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        # Log the request
-        print(datetime.now(), f"Request: {request.method} {request.url}")
+        a = random.randint(1, 1000)
+        body = await request.body()
+        print("Logged Body:", a, body.decode('utf-8'))
 
-        # Process the request and get the response
+        # Re-inject the body into the request
+        async def receive():
+            return {"type": "http.request", "body": body}
+
+        request._receive = receive  # Override the request's receive method
+
+        # Pass the request to the next handler
         response = await call_next(request)
 
-        # Log the response
-        print(datetime.now(), f"Response status: {response.status_code}", request.url)
+        print(datetime.now(), f"Response status: {response.status_code}", a, request.url)
+
 
         return response
+
 
 app.add_middleware(LoggingMiddleware)
 
