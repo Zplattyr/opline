@@ -5,6 +5,7 @@ from config import settings
 from sqlalchemy import MetaData
 from fastapi import FastAPI
 from datetime import datetime
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 import asyncio
 from getOnliners import getCountOnliners
@@ -32,7 +33,16 @@ engine = create_async_engine(
     pool_pre_ping=True
 )
 
-app = FastAPI(debug=True)
+app = FastAPI()
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        print(datetime.now(), "Request:", request)
+        response = await call_next(request)
+        print(datetime.now(), "Response:", response)
+        return response
+
+app.add_middleware(LoggingMiddleware)
 
 MAX_ON_SERVER = 10
 MAX_DEVICES = 2
