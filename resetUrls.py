@@ -44,20 +44,22 @@ async def resetUrl(url:str, engine, stop_event):
 
     host, main_port, panel, username, password = await getHostData(host, engine)
 
-    print(host, main_port, panel, username, password)
+    # print(host, main_port, panel, username, password)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
     if not onliners: onliners = []
     if onliners: print('Onliners on ', server, ' - ', onliners)
-    print(inbounds)
+    # print(inbounds)
 
 
     for indata in inbounds:
         remark = indata['remark']
         if remark != server:
             continue
-        print(indata)
+        # print(indata)
         clients = json.loads(indata['settings'])['clients']
+        print("1111", clients)
         for client in clients:
+            print("222", client)
             if url not in onlinerskey:
                 last_time = 0
             else:
