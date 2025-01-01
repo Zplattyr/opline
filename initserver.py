@@ -1,3 +1,5 @@
+import asyncio
+
 from resetUrls import getOnliners, addTrojan, addVless, AddToAvailables, generate_base62_password
 from main import engine
 import json
@@ -82,42 +84,43 @@ def addConnection(host, main_port, conport, panel, username, password, remark, s
     response = session.request("POST", url, headers=headers, data=connection)
     print(response.text)
 
+async def main():
+    with open("login.txt", "r", encoding="utf-8") as file:
+        lines = file.readlines()
 
-with open("login.txt", "r", encoding="utf-8") as file:
-    lines = file.readlines()
+        host = lines[0].strip()
+        main_port = lines[1].strip()
+        panel = lines[2].strip()
+        username = lines[3].strip()
+        password = lines[4].strip()
+        count = int(lines[5].strip())
+        proto = lines[6].strip()
+        _ = lines[7].strip()
+        conport = int(lines[8].strip())
+        site = lines[9].strip()
+        name = lines[10].strip()
 
-    host = lines[0].strip()
-    main_port = lines[1].strip()
-    panel = lines[2].strip()
-    username = lines[3].strip()
-    password = lines[4].strip()
-    count = int(lines[5].strip())
-    proto = lines[6].strip()
-    _ = lines[7].strip()
-    conport = int(lines[8].strip())
-    site = lines[9].strip()
-    name = lines[10].strip()
+        addConnection(host, main_port, conport, panel, username, password, name, site, proto)
 
-    addConnection(host, main_port, conport, panel, username, password, name, site, proto)
-
-    onliners, inbounds = getOnliners(host, main_port, panel, username, password)
-    for indata in inbounds:
-        remark = indata['remark']
-        id = indata['id']
-        if remark.find('trojan') != -1:
-            pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
-            sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
-            for i in range(count):
-                key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, remark)
-                await AddToAvailables(engine, key)
-        elif remark.find('vless') != -1:
-            pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
-            sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
-            for i in range(count):
-                key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, remark)
-                await AddToAvailables(engine, key)
-
-
+        onliners, inbounds = getOnliners(host, main_port, panel, username, password)
+        for indata in inbounds:
+            remark = indata['remark']
+            id = indata['id']
+            if remark.find('trojan') != -1:
+                pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
+                sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
+                for i in range(count):
+                    key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, remark)
+                    await AddToAvailables(engine, key)
+            elif remark.find('vless') != -1:
+                pbk = json.loads(indata['streamSettings'])['realitySettings']['settings']['publicKey']
+                sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
+                for i in range(count):
+                    key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, remark)
+                    await AddToAvailables(engine, key)
 
 
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
