@@ -14,6 +14,7 @@ from data import onlinerskey
 
 
 async def getAndResetUrls(engine, stop_event):
+    await asyncio.sleep(10)
     while True:
         async with engine.connect() as condata:
             res = (await condata.execute(text("select * from availables"))).fetchall()

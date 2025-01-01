@@ -37,9 +37,15 @@ app = FastAPI()
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        print(datetime.now(), "Request:", request)
+        # Log the request
+        print(datetime.now(), f"Request: {request.method} {request.url}")
+
+        # Process the request and get the response
         response = await call_next(request)
-        print(datetime.now(), "Response:", response)
+
+        # Log the response
+        print(datetime.now(), f"Response status: {response.status_code}", request.url)
+
         return response
 
 app.add_middleware(LoggingMiddleware)
