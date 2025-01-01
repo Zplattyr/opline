@@ -60,10 +60,12 @@ async def resetUrl(url:str, engine, stop_event):
         print("1111", clients)
         for client in clients:
             print("222", client)
-            if url not in onlinerskey:
-                last_time = 0
-            else:
+            last_time = 0
+            print("3333")
+            if url in onlinerskey:
+                print("4444")
                 last_time = onlinerskey[url]
+                print("555", last_time)
             print("reset", url, name not in onliners, time.time() - last_time >= 1800, datetime.now(), datetime.fromtimestamp(last_time))
             if client['email'] == name and name not in onliners and time.time() - last_time >= 1800:
                 id = indata['id']
