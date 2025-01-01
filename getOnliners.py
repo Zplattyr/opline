@@ -15,9 +15,9 @@ def getCountOnliners(url, engine):
     return count_online(host, main_port, panel, username, password)
 
 def getHostData(host, engine):
-    with engine.connect() as conn:
+    async with engine.connect() as conn:
         stmt = text('select * from hosts where "host" = \'' + host + '\'')
-        res = conn.execute(stmt)
+        res = await conn.execute(stmt)
         host_info = res.fetchall()[0]
 
     host = host_info[1]
@@ -51,7 +51,7 @@ def count_online(host, main_port, panel, username, password):
         count = 0
     return count
 
-async def isUrlOnline(engine, url, mutex):
+async def isUrlOnline(engine, url):
     try:
         host = url.split('@')[1].split(':')[0]
         fullname = url.split('#')[1].split('-')
@@ -59,8 +59,7 @@ async def isUrlOnline(engine, url, mutex):
         server = fullname[0] + '-' + fullname[1] + '-' + fullname[2]
     except:
         return
-    async with mutex:
-        host, main_port, panel, username, password = getHostData(host, engine)
+    host, main_port, panel, username, password = getHostData(host, engine)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
     # print(onliners)
     if not onliners: onliners = []

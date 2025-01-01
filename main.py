@@ -3,7 +3,7 @@ import time
 from sqlalchemy import create_engine, text
 from config import settings
 from sqlalchemy import MetaData
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI
 from datetime import datetime
 from pydantic import BaseModel
 import asyncio
@@ -11,6 +11,7 @@ from getOnliners import getCountOnliners
 from resetUrls import getAndResetUrls
 from getOnliners import isUrlOnline
 from data import onlinerskey, onlinerspass
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 mutex = asyncio.Lock()
@@ -23,11 +24,12 @@ class Passcode(BaseModel):
 
 metadata = MetaData()
 
-engine = create_engine(
+engine = create_async_engine(
     url = settings.DATABASE_URL_psycopg,
     echo=False,
     pool_size=5,
-    max_overflow=10
+    max_overflow=10,
+    pool_pre_ping=True
 )
 
 app = FastAPI()
@@ -40,20 +42,16 @@ stop_event = asyncio.Event()
 async def get_key(pasco: Passcode):
     if not pasco.login:
         print(pasco, "-4")
-        with engine.connect() as condata:
+        async with engine.connect() as condata:
             print(pasco, "-3")
-            async with mutex:
-                print(pasco, "-2")
-                res = condata.execute(text("select * from passcodes")).all()
+            res = (await condata.execute(text("select * from passcodes"))).fetchall()
             query = pasco
             passcodes = [passcode for passcode, date in res]
             dates = [date for passcode, date in res]
             pasco = pasco.passcode
             if len(pasco) > 10:
                 return "!INVALID "
-            async with mutex:
-                print(pasco, "-1")
-                res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
+            res2 = (await condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\''))).fetchall()
             if pasco in passcodes:
                 print(pasco, "1")
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
@@ -65,8 +63,7 @@ async def get_key(pasco: Passcode):
                     print(pasco, "2")
                     if stop_event.is_set():
                         await stop_event.wait()
-                    async with mutex:
-                        res = condata.execute(text("select * from availables")).all()
+                    res = (await condata.execute(text("select * from availables"))).fetchall()
                     keys:list[str] = [key for _, key in res]
                     for key in keys:
                         print(pasco, "3")
@@ -88,7 +85,7 @@ async def get_key(pasco: Passcode):
                             continue
                         try:
                             print(pasco, "8")
-                            if not await isUrlOnline(engine, key, mutex):
+                            if not await isUrlOnline(engine, key):
                                 print(pasco, "9")
                                 if key in onlinerskey and time.time() - onlinerskey[key] < 1800:
                                     print(pasco, "10")
@@ -113,17 +110,14 @@ async def get_key(pasco: Passcode):
                 print('notinpasscodes')
                 return "!INVALID "
     else:
-        with engine.connect() as condata:
-            async with mutex:
-                res = condata.execute(text("select * from passcodes")).all()
-            query = pasco
+        async with engine.connect() as condata:
+            res = (await condata.execute(text("select * from passcodes"))).fetchall()
             passcodes = [passcode for passcode, date in res]
             dates = [date for passcode, date in res]
             pasco = pasco.passcode
             if len(pasco) > 10:
                 return "!INVALID "
-            async with mutex:
-                res2 = condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\'')).all()
+            res2 = (await condata.execute(text('select * from users_passcodes where "passcode" = \'' + pasco + '\''))).fetchall()
             if pasco in passcodes:
                 passdate = datetime.strptime(dates[passcodes.index(pasco)], "%Y-%m-%d")
                 today = datetime.today()
@@ -181,7 +175,7 @@ async def delete_online_keys():
 async def on_startup():
     # background_tasks.add_task(print_clients)
     # background_tasks.add_task(delete_online_keys)
-    # background_tasks.add_task(getAndResetUrls, engine, mutex, stop_event)
+    # background_tasks.add_task(getAndResetUrls, engine,stop_event)
     asyncio.create_task(print_clients())
     asyncio.create_task(delete_online_keys())
-    asyncio.create_task(getAndResetUrls(engine, mutex, stop_event))
+    asyncio.create_task(getAndResetUrls(engine, stop_event))

@@ -15,13 +15,12 @@ from data import onlinerskey
 
 async def getAndResetUrls(engine, mutex, stop_event):
     while True:
-        async with mutex:
-            with engine.connect() as condata:
-                res = condata.execute(text("select * from availables")).all()
+        async with engine.connect() as condata:
+            res = (await condata.execute(text("select * from availables"))).fetchall()
         urls = [url for _, url in res]
         for url in urls:
             try:
-                await resetUrl(url, engine, mutex, stop_event)
+                await resetUrl(url, engine, stop_event)
                 await asyncio.sleep(5)
             except:
                 continue
@@ -30,7 +29,7 @@ async def getAndResetUrls(engine, mutex, stop_event):
         await asyncio.sleep(60)
 
 
-async def resetUrl(url:str, engine, mutex, stop_event):
+async def resetUrl(url:str, engine, stop_event):
     try:
         host = url.split('@')[1].split(':')[0]
         fullname = url.split('#')[1].split('-')
@@ -39,8 +38,7 @@ async def resetUrl(url:str, engine, mutex, stop_event):
     except:
         return
 
-    async with mutex:
-        host, main_port, panel, username, password = getHostData(host, engine)
+    host, main_port, panel, username, password = getHostData(host, engine)
 
     # print(host, main_port, panel, username, password)
     onliners, inbounds = getOnliners(host, main_port, panel, username, password)
@@ -69,9 +67,8 @@ async def resetUrl(url:str, engine, mutex, stop_event):
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addTrojan(host,main_port,indata['port'],panel,username,password,id, pbk, sid, server)
                     stop_event.set()
-                    async with mutex:
-                        AddToAvailables(engine, key)
-                        DeleteFromAvailables(engine, url)
+                    AddToAvailables(engine, key)
+                    DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteTrojan(host, main_port, panel, username, password, id, client['password'])
                 elif server.find('vless') != -1:
@@ -80,9 +77,8 @@ async def resetUrl(url:str, engine, mutex, stop_event):
                     sid = json.loads(indata['streamSettings'])['realitySettings']['shortIds'][0]
                     key = addVless(host, main_port, indata['port'], panel, username, password, id, pbk, sid, server)
                     stop_event.set()
-                    async with mutex:
-                        AddToAvailables(engine, key)
-                        DeleteFromAvailables(engine, url)
+                    AddToAvailables(engine, key)
+                    DeleteFromAvailables(engine, url)
                     stop_event.clear()
                     deleteVless(host, main_port, panel, username, password, id, client['id'])
                     print("deleted url:", url[0:30])
@@ -103,8 +99,8 @@ async def resetUrl(url:str, engine, mutex, stop_event):
 def DeleteFromAvailables(engine, url):
     while True:
         try:
-            with engine.begin() as condata:
-                condata.execute(text('delete from availables where "url" = \'' + url + '\''))
+            async with engine.begin() as condata:
+                await condata.execute(text('delete from availables where "url" = \'' + url + '\''))
             break
         except:
             print('cantdeletefromavailables')
@@ -112,8 +108,8 @@ def DeleteFromAvailables(engine, url):
 def AddToAvailables(engine, url):
     while True:
         try:
-            with engine.begin() as condata:
-                condata.execute(text('insert into availables (url) values (\'' + url + '\')'))
+            async with engine.begin() as condata:
+                await condata.execute(text('insert into availables (url) values (\'' + url + '\')'))
             break
         except:
             print('cantaddtoavailables')
@@ -294,9 +290,9 @@ def generate_base62_password(length=10):
     return password
 
 def getHostData(host, engine):
-    with engine.connect() as conn:
+    async with engine.connect() as conn:
         stmt = text('select * from hosts where "host" = \'' + host + '\'')
-        res = conn.execute(stmt)
+        res = await conn.execute(stmt)
         host_info = res.fetchall()[0]
 
 
