@@ -32,7 +32,7 @@ engine = create_async_engine(
     pool_pre_ping=True
 )
 
-app = FastAPI()
+app = FastAPI(debug=True)
 
 MAX_ON_SERVER = 10
 MAX_DEVICES = 2
