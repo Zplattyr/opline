@@ -27,7 +27,7 @@ class TrackingLock:
 
 class SafeDict:
     def __init__(self):
-        self._mutex = TrackingLock()
+        self._mutex = asyncio.Lock()
         self._map = dict()
 
     def __setitem__(self, key, value):
@@ -39,11 +39,11 @@ class SafeDict:
             return self._map[key]
 
     def __contains__(self, key):
-        owner = self._mutex.get_owner()
-        if owner:
-            print(f"Lock is held by task: {owner.get_name()}")
-        else:
-            print("Lock is currently not held by any task.")
+        # owner = self._mutex.get_owner()
+        # if owner:
+        #     print(f"Lock is held by task: {owner.get_name()}")
+        # else:
+        #     print("Lock is currently not held by any task.")
         with self._mutex:
             return key in self._map
 
